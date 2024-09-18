@@ -1,1 +1,84 @@
 @import url(_reset.css);
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+
+body {
+    font-family: Arial, sans-serif;
+    line-height: 1.6;
+    background-color: #f4f4f4;
+    color: #333;
+    padding: 20px;
+}
+
+/* Logo */
+img {
+    max-width: 100%;
+    height: auto;
+    display: block;
+    margin: 0 auto 20px;
+}
+
+
+.headline-app {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.headline-app h1 {
+    font-size: 2rem;
+    color: #333;
+}
+
+/* Menu */
+.SM-menu {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin-top: 20px;
+}
+.SM-menu a {
+    text-decoration: none;
+    color: #007bff;
+    font-size: 1rem;
+    font-weight: bold;
+}
+.SM-menu a:hover {
+    text-decoration: underline;
+}
+
+/* Button*/
+button {
+    background-color: #00c8ff;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    padding: 10px 20px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    
+}
+button:hover {
+    background-color: #0056b3;
+}
+
+/* Media Queries*/
+@media (max-width: 768px) {
+    .SM-menu {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .SM-menu a {
+        margin-bottom: 10px;
+    }
+
+    .SM-menu a:last-child {
+        margin-bottom: 0;
+    }
+}

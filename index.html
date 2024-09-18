@@ -3,20 +3,25 @@
 
 <head>
   <meta charset="UTF-8" />
-
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Noroff FED2 JS2 CA</title>
-  <script type="module" src="/src/app.js"></script>
+  <title>Social Media App - Noroff FED2 JS2 CA</title>
+  <link rel="stylesheet" href="/src/css/style.css">
+  <script type="module" src="/src/app.js" defer></script>
 </head>
 
 <body>
   <img src="/images/noroff-logo.png" alt="Noroff Logo" />
-
-  <h1>Home</h1>
-
-  <a href="/profile/">My Profile</a>
-  <a href="/auth/login/">Login</a>
-  <a href="/auth/register/">Register</a>
-  <button>Logout</button>
+  <div class="headline-app">
+    <h1>Social Media App Assignment</h1>
+  </div>
+  <div class="SM-menu">
+    <a href="/profile/">My Profile</a>
+    <a href="/auth/login/">Login</a>
+    <a href="/auth/register/">Register</a>
+    <button id="logout">Logout</button>
+  </div>
+  <div class="feed">
+    <h2>New posts</h2>
+  </div>
 </body>
 </html>

@@ -2,10 +2,11 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Noroff FED2 JS2 CA</title>
     <script type="module" src="/src/app.js"></script>
+    <link rel="stylesheet" href="/src/css/style.css">
+    <script type="module" src="/src/js/api/auth/register.js" defer></script>
   </head>
 
   <body>
@@ -48,8 +49,12 @@
         />
       </div>
 
+      <!-- Error success message -->
+      <div id="errorMessages" style="color: red;"></div>
+      <div id="successMessages" style="color: green;"></div>
+
       <a href="/auth/login/">Login</a>
-      <button>Register</button>
+      <button type="submit">Register</button>
     </form>
   </body>
 </html>
