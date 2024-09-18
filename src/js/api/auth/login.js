@@ -46,7 +46,7 @@ document.addEventListener("DOMContentLoaded", function () {
         }
 
         // Handle successful login
-        const accessToken = responseData.accessToken; // Assuming the token is called 'accessToken'
+        const accessToken = responseData.accessToken; 
 
         // Save the token in localStorage
         localStorage.setItem("accessToken", accessToken);
@@ -54,10 +54,10 @@ document.addEventListener("DOMContentLoaded", function () {
         // Display success message
         document.getElementById("successMessages").innerText = "Login successful! Loading feed...";
 
-        // Timer for loading feed
+        // TLoading feed delay
         setTimeout(() => {
             window.location.href = "/index.html";  
-        }, 1000);  // Delay for 1.5 seconds 
+        }, 800);  // Delay for 0.8 seconds
     } catch (error) {
         console.error("Login failed:", error);
         document.getElementById("errorMessages").innerText = "Error: " + error.message;
