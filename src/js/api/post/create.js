@@ -6,22 +6,20 @@ export async function createPost({ title, body, tags, media }) {
         const postData = {
             title,
             body,
-            tags: tags.split(',').map(tag => tag.trim()), // Convert tags to array
-        };
-
-        // Only add media if both media URL and alt text are provided
-        if (media.url && media.alt) {
-            postData.media = {
+            tags: tags.split(',').map(tag => tag.trim()),
+            media: {
                 url: media.url,
                 alt: media.alt,
-            };
-        }
+            },
+        };
+
 
         const response = await fetch(API_SOCIAL_POSTS, {
             method: 'POST',
             headers: headers(true), 
             body: JSON.stringify(postData),
         });
+
 
         if (!response.ok) {
             const errorData = await response.json();
@@ -61,8 +59,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     body,
                     tags,
                     media: {
-                        url: mediaUrl.trim(),
-                        alt: mediaAlt.trim(),
+                        url: mediaUrl,
+                        alt: mediaAlt,
                     }
                 });
 
@@ -78,4 +76,3 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 });
-

@@ -74,14 +74,16 @@ async function showPost() {
     // Check if the logged-in user ID matches the post's author ID
     const isAuthor = post.author && post.author.id === userId;
 
-    // Populate post details
+   // Populate post details
     postDetailsContainer.innerHTML = `
-        <h2>${post.title}</h2>
-        <img src="${post.media ? post.media.url : 'images/noroff-logo.png'}" alt="${post.media ? post.media.alt : 'No image available'}" />
-        <p><strong>By:</strong> ${post.author ? post.author.name : 'Unknown Author'}</p>
-        <p><strong>Published on:</strong> ${new Date(post.created).toLocaleDateString()}</p>
-        <p>${post.body}</p>
-        <p><strong>Categories:</strong> ${post.tags.join(', ')}</p>
+    <h2>${post.title}</h2>
+    ${post.media ? `
+        <img src="${post.media.url}" alt="${post.media.alt}" />
+    ` : ''}
+    <p><strong>By:</strong> ${post.author ? post.author.name : 'Unknown Author'}</p>
+    <p><strong>Published on:</strong> ${new Date(post.created).toLocaleDateString()}</p>
+    <p>${post.body}</p>
+    <p><strong>Categories:</strong> ${post.tags.join(', ')}</p>
     `;
 
     // Show edit and delete buttons if the user is the author
