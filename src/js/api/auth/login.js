@@ -9,58 +9,71 @@ document.addEventListener("DOMContentLoaded", function () {
     form.addEventListener("submit", async function (event) {
         event.preventDefault();
 
-    // Clear previous messages
-        document.getElementById("errorMessages").innerText = "";
-        document.getElementById("successMessages").innerText = "";
+        // Clear previous messages
+        const errorMessages = document.getElementById("errorMessages");
+        const successMessages = document.getElementById("successMessages");
+        errorMessages.innerText = "";
+        successMessages.innerText = "";
 
-    // Form data
-        const formData = {
-        email: document.getElementById("email").value.trim(),
-        password: document.getElementById("password").value.trim(),
-    };
+        // Form data
+        const email = document.getElementById("email").value.trim();
+        const password = document.getElementById("password").value.trim();
 
-    // Basic validation
-        if (!formData.email || !formData.password) {
-        document.getElementById("errorMessages").innerText =
-            "Both email and password are required.";
-        return;
-    }
+        // Basic validation
+        if (!email || !password) {
+            errorMessages.innerText = "Both email and password are required.";
+            return;
+        }
 
+        // Call login function
+        try {
+            await loginUser({ email, password });
+        } catch (error) {
+            errorMessages.innerText = "Error: " + error.message;
+        }
+    });
+});
+
+
+// Log in 
+async function loginUser({ email, password }) {
     try {
         const response = await fetch("https://v2.api.noroff.dev/auth/login", {
             method: "POST",
-            headers: {
-            "Content-Type": "application/json",
-        },
-            body: JSON.stringify(formData),
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email, password }),
         });
 
+        // Parse the response JSON
         const responseData = await response.json();
 
-        // Log response for debugging
-        console.log(responseData);
+        // Log the entire response data to see its structure
+        console.log('Login response data:', responseData);
 
-        // Handle failed login
+        // Login ok or no? 
         if (response.status !== 200) {
             throw new Error(responseData.message || "Login failed. Please check your credentials.");
         }
 
-        // Handle successful login
-        const accessToken = responseData.accessToken; 
+        // Correctly extract the accessToken from the data property
+        const accessToken = responseData.data.accessToken;  
 
-        // Save the token in localStorage
-        localStorage.setItem("accessToken", accessToken);
+        // Store the accessToken in localStorage
+        if (accessToken) {
+            localStorage.setItem("accessToken", accessToken);
+            console.log('Access token saved to localStorage.');
+        } else {
+            console.error('Access token not found in response.');
+        }
 
-        // Display success message
-        document.getElementById("successMessages").innerText = "Login successful! Loading feed...";
-
-        // TLoading feed delay
+        // Optional: Redirect to feed and show login successful msg
+        const successMessages = document.getElementById("successMessages");
+        successMessages.innerText = "Logging in! Loading feed...";
         setTimeout(() => {
-            window.location.href = "/index.html";  
-        }, 800);  // Delay for 0.8 seconds
+             window.location.href = "/";  // Redirect to feed or homepage
+         }, 800);  // Delay for 0.8 seconds
     } catch (error) {
         console.error("Login failed:", error);
-        document.getElementById("errorMessages").innerText = "Error: " + error.message;
-        }
-    });
-});
+        throw error;
+    }
+}

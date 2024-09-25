@@ -7,6 +7,7 @@
   <title>Social Media App - Noroff FED2 JS2 CA</title>
   <link rel="stylesheet" href="/src/css/style.css">
   <script type="module" src="/src/app.js" defer></script>
+  <script type="module" src="/src/js/main.js" defer></script>
 </head>
 
 <body>
@@ -15,6 +16,7 @@
     <h1>Social Media App Assignment</h1>
   </div>
   <div class="SM-menu">
+    <a href="/post/create/index.html">Publish Post</a>
     <a href="/profile/">My Profile</a>
     <a href="/auth/login/">Login</a>
     <a href="/auth/register/">Register</a>
@@ -22,6 +24,8 @@
   </div>
   <div class="feed">
     <h2>New posts</h2>
+    <ul id="posts-container" class="posts-container">Loading posts...</ul>
   </div>
 </body>
 </html>
+

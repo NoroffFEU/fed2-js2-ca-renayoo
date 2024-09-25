@@ -67,6 +67,45 @@ button:hover {
     background-color: #0056b3;
 }
 
+.feed {
+    display: flex;
+    margin: 50px;
+    flex-direction: column;
+    text-align: center; 
+}
+
+.feed h2 {
+    margin: 0;
+    font-size: 1.5em;
+}
+
+.feed div {
+    margin-top: 1em;
+}
+
+.feed a {
+    margin: 0 0.5em;
+    text-decoration: none;
+    color: #007BFF; 
+}
+
+.feed a:hover {
+    text-decoration: underline;
+}
+
+.posts-container {
+    list-style: none;
+}
+.post {
+    max-height: 500px;
+    padding: 30px;
+    margin: 10px;
+    border: 2px solid black;
+}
+img {
+    max-height: 200px;
+}
+
 /* Media Queries*/
 @media (max-width: 768px) {
     .SM-menu {
