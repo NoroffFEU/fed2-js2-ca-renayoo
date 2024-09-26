@@ -50,22 +50,30 @@ document.addEventListener('DOMContentLoaded', () => {
             const title = document.getElementById('title').value;
             const body = document.getElementById('body').value;
             const tags = document.getElementById('tags').value;
-            const mediaUrl = document.getElementById('media-url').value;
-            const mediaAlt = document.getElementById('media-alt').value;
+            const mediaUrl = document.getElementById('media-url').value.trim(); 
+            const mediaAlt = document.getElementById('media-alt').value.trim(); 
+
+            // Construct media object
+            const media = {
+                url: mediaUrl || null,  
+                alt: mediaAlt || null,  
+            };
+
+            // Check if media fields are empty
+            if (!media.url || !media.alt) {
+                console.warn('Media URL or Alt text is empty. Media will not be added.');
+            }
 
             try {
                 const createdPost = await createPost({
                     title,
                     body,
                     tags,
-                    media: {
-                        url: mediaUrl || null,  
-                        alt: mediaAlt || null,  
-                    }
+                    media
                 });
 
-                // Redirect or show confirmation message
-                window.location.href = '/'; 
+            // Redirect or show confirmation message
+            window.location.href = '/'; 
             } catch (error) {
                 console.error('Failed to create post:', error.message);
                 alert('Failed to create post: ' + error.message);
