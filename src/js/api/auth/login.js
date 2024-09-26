@@ -34,7 +34,6 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 });
 
-
 // Log in 
 async function loginUser({ email, password }) {
     try {
@@ -47,9 +46,6 @@ async function loginUser({ email, password }) {
         // Parse the response JSON
         const responseData = await response.json();
 
-        // Log the entire response data to see its structure
-        console.log('Login response data:', responseData);
-
         // Login ok or no? 
         if (response.status !== 200) {
             throw new Error(responseData.message || "Login failed. Please check your credentials.");
@@ -61,19 +57,24 @@ async function loginUser({ email, password }) {
         // Store the accessToken in localStorage
         if (accessToken) {
             localStorage.setItem("accessToken", accessToken);
-            console.log('Access token saved to localStorage.');
+            
+            // Extract and store userId (assuming it is part of the JWT payload)
+            const userId = JSON.parse(atob(accessToken.split('.')[1])).sub; // Adjust based on your token structure
+            localStorage.setItem('userId', userId);
         } else {
             console.error('Access token not found in response.');
         }
 
-        // Optional: Redirect to feed and show login successful msg
+        // Redirect to feed and show login successful msg with delay
         const successMessages = document.getElementById("successMessages");
         successMessages.innerText = "Logging in! Loading feed...";
         setTimeout(() => {
-             window.location.href = "/";  // Redirect to feed or homepage
-         }, 800);  // Delay for 0.8 seconds
+           window.location.href = "/";  // Redirect to feed or homepage
+        }, 800);  // Delay for 0.8 seconds
     } catch (error) {
         console.error("Login failed:", error);
         throw error;
     }
 }
+
+

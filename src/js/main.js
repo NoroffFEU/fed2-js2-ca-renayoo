@@ -6,6 +6,10 @@ document.addEventListener("DOMContentLoaded", function () {
     setupLogoutButton(); 
 });
 
+// Constants for pagination
+const POSTS_PER_PAGE = 12;
+const TOTAL_POSTS = 60;
+
 // Check accessToken in localStorage
 function isUserLoggedIn() {
     return !!localStorage.getItem('accessToken');
@@ -34,15 +38,25 @@ async function fetchPosts() {
         }
 
         const responseData = await response.json();
-        return responseData.data; 
+        console.log('Fetched Posts:', responseData.data); // Debugging output
+        return responseData.data.slice(0, TOTAL_POSTS); // Limit to 60 posts
     } catch (error) {
         console.error('Error fetching posts:', error);
         return [];
     }
 }
 
-// Display feed with published posts 
+// Show Feed with Pagination
+let currentPage = 1; // Track the current page
+let allPosts = []; // Store all fetched posts
+
 async function showFeed() {
+    allPosts = await fetchPosts(); 
+    renderPosts();
+    renderPagination();
+}
+
+function renderPosts() {
     const feedContainer = document.querySelector('.feed');
     feedContainer.innerHTML = `
         <h2>New posts</h2>
@@ -50,33 +64,33 @@ async function showFeed() {
         <ul id="posts-container" class="posts-container"></ul>
     `;
 
-    const posts = await fetchPosts(); 
     const postsContainer = document.getElementById('posts-container');
+    postsContainer.innerHTML = ''; // Clear previous posts
 
-    if (posts.length === 0) {
+    // Calculate posts to display
+    const startIndex = (currentPage - 1) * POSTS_PER_PAGE;
+    const endIndex = startIndex + POSTS_PER_PAGE;
+    const postsToDisplay = allPosts.slice(startIndex, endIndex);
+
+    if (postsToDisplay.length === 0) {
         postsContainer.innerHTML = '<li>No posts available.</li>';
         return;
     }
 
-    posts.forEach(post => {
+    postsToDisplay.forEach(post => {
         const postElement = document.createElement('li');
         postElement.className = 'post';
-
+    
         const titleElement = document.createElement('h4');
         titleElement.className = 'post-title';
         titleElement.textContent = post.title;
-
-        const authorName = post.author ? post.author.name : 'Unknown Author';
-        const authorElement = document.createElement('p');
-        authorElement.className = 'post-author';
-        authorElement.textContent = `By: ${authorName}`;
-
+    
         const dateElement = document.createElement('p');
         dateElement.className = 'post-date';
         const date = new Date(post.created);
         dateElement.textContent = `Published on: ${date.toLocaleDateString()}`;
-
-        // Only create the image element if there is an image in the post
+    
+        // Image handling
         if (post.media && post.media.url) {
             const imgElement = document.createElement('img');
             imgElement.src = post.media.url; 
@@ -84,39 +98,110 @@ async function showFeed() {
             imgElement.addEventListener('click', () => {
                 window.location.href = `/post/index.html?id=${post.id}`;
             });
-            postElement.appendChild(imgElement); // Append image to post if there is one
+            postElement.appendChild(imgElement);
         }
-
+    
         const bodyElement = document.createElement('p');
         bodyElement.className = 'post-body';
         bodyElement.textContent = post.body;
-
+    
         const tagsElement = document.createElement('p');
         tagsElement.className = 'post-tags';
         tagsElement.textContent = `Categories: ${post.tags.join(', ')}`;
+        
+        // Comments and reactions count
+        const commentsCountElement = document.createElement('p');
+        commentsCountElement.className = 'post-comments-count';
+        commentsCountElement.textContent = `Comments: ${post._count.comments || 0}`;
 
-        // Create a "View Post" button
+        const reactionsCountElement = document.createElement('p');
+        reactionsCountElement.className = 'post-reactions-count';
+        reactionsCountElement.textContent = `Reactions: ${post._count.reactions || 0}`;
+    
         const viewPostButton = document.createElement('button');
         viewPostButton.textContent = 'View Post';
         viewPostButton.className = 'view-post-button';
         viewPostButton.addEventListener('click', () => {
             window.location.href = `/post/index.html?id=${post.id}`;
         });
-
+    
         postElement.appendChild(titleElement);
-        postElement.appendChild(authorElement);
-        postElement.appendChild(dateElement);
+        postElement.appendChild(dateElement); 
         postElement.appendChild(bodyElement);
         postElement.appendChild(tagsElement);
+        postElement.appendChild(commentsCountElement);
+        postElement.appendChild(reactionsCountElement);
         postElement.appendChild(viewPostButton);
-
+    
         postsContainer.appendChild(postElement);
+    });    
+}
+
+function renderPagination() {
+    const feedContainer = document.querySelector('.feed');
+    const paginationContainer = document.createElement('div');
+    paginationContainer.className = 'pagination';
+    
+    const totalPages = Math.ceil(allPosts.length / POSTS_PER_PAGE);
+    
+    // Create previous button
+    const prevButton = document.createElement('button');
+    prevButton.textContent = 'Previous';
+    prevButton.disabled = currentPage === 1; // Disable if on the first page
+    prevButton.addEventListener('click', () => {
+        if (currentPage > 1) {
+            currentPage--;
+            renderPosts();
+            renderPagination();
+            scrollToTop(); // Scroll to top on page change
+        }
+    });
+    
+    paginationContainer.appendChild(prevButton);
+    
+    // Create page number buttons
+    for (let i = 1; i <= totalPages; i++) {
+        const pageButton = document.createElement('button');
+        pageButton.textContent = i;
+        pageButton.className = (i === currentPage) ? 'active' : '';
+        pageButton.addEventListener('click', () => {
+            currentPage = i;
+            renderPosts();
+            renderPagination();
+            scrollToTop(); // Scroll to top on page change
+        });
+        paginationContainer.appendChild(pageButton);
+    }
+    
+    // Create next button
+    const nextButton = document.createElement('button');
+    nextButton.textContent = 'Next';
+    nextButton.disabled = currentPage === totalPages; // Disable if on the last page
+    nextButton.addEventListener('click', () => {
+        if (currentPage < totalPages) {
+            currentPage++;
+            renderPosts();
+            renderPagination();
+            scrollToTop(); // Scroll to top on page change
+        }
+    });
+    
+    paginationContainer.appendChild(nextButton);
+    feedContainer.appendChild(paginationContainer);
+}
+
+// Scroll to top function
+function scrollToTop() {
+    window.scrollTo({
+        top: 0,
+        behavior: 'smooth' // Smooth scrolling
     });
 }
 
 async function handleLogout() {
     try {
         localStorage.removeItem('accessToken');
+        localStorage.removeItem('username'); 
         showLoginMessage();
         updateMenuForLoggedOutUser();
     } catch (error) {
@@ -135,6 +220,7 @@ function setupLogoutButton() {
     }
 }
 
+// Updated menu for logged out user
 function updateMenuForLoggedOutUser() {
     const publishPostLink = document.querySelector('.SM-menu a[href="/post/create/index.html"]');
     const loginLink = document.querySelector('.SM-menu a[href="/auth/login/"]');
@@ -149,6 +235,7 @@ function updateMenuForLoggedOutUser() {
     if (logoutButton) logoutButton.style.display = 'none'; 
 }
 
+// Showing and hiding menu for logged in user
 function updateMenuForLoggedInUser() {
     const publishPostLink = document.querySelector('.SM-menu a[href="/post/create/index.html"]');
     const loginLink = document.querySelector('.SM-menu a[href="/auth/login/"]');
@@ -164,11 +251,17 @@ function updateMenuForLoggedInUser() {
 }
 
 async function init() {
-    if (isUserLoggedIn()) {
-        await showFeed();
-        updateMenuForLoggedInUser();
+    const userIsLoggedIn = isUserLoggedIn();
+    
+    if (!userIsLoggedIn) {
+        showLoginMessage(); 
     } else {
-        showLoginMessage();
-        updateMenuForLoggedOutUser();
+        await showFeed(); 
+        updateMenuForLoggedInUser();
     }
 }
+
+
+
+
+

@@ -11,8 +11,7 @@ export async function register({ name, email, password }) {
 
         const responseData = await response.json();
 
-
-        // Register ok or no?
+        // Check if registration was successful
         if (response.status !== 201) {
             throw new Error(responseData.message || "Unable to register user.");
         }
@@ -56,6 +55,9 @@ document.addEventListener("DOMContentLoaded", function () {
         try {
             const responseData = await register(formData);
 
+            // Save the user's name to localStorage for later use
+            localStorage.setItem('username', formData.name); // Save name to localStorage
+
             // Handle successful response
             document.getElementById("successMessages").innerText = "User registered successfully!";
 
@@ -68,3 +70,5 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     });
 });
+
+

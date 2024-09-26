@@ -31,6 +31,7 @@ async function fetchPostById(postId) {
         }
 
         const responseData = await response.json();
+        console.log('Fetched post data:', responseData); 
         return responseData.data; 
     } catch (error) {
         console.error('Error fetching post:', error);
@@ -56,106 +57,94 @@ async function showPost() {
         return;
     }
 
-    // Get logged-in user's access token and extract user info
+    const reactions = Array.isArray(post.reactions) ? post.reactions : [];
+    const comments = Array.isArray(post.comments) ? post.comments : [];
+
+    // Populate post details
+    postDetailsContainer.innerHTML = `
+        <h2>${post.title}</h2>
+        ${post.media ? `
+            <img src="${post.media.url}" alt="${post.media.alt}" />
+        ` : ''}
+        <p><strong>Published on:</strong> ${new Date(post.created).toLocaleDateString()}</p>
+        <p><strong>Last Updated on:</strong> ${new Date(post.updated).toLocaleDateString()}</p>
+        <p><strong>Body:</strong> ${post.body}</p>
+        <p><strong>Categories:</strong> ${post.tags.join(', ')}</p>
+        
+        <h3>Reactions:</h3>
+        <ul>
+            ${reactions.length > 0 ? reactions.map(reaction => `
+                <li>
+                    <strong>${reaction.symbol}:</strong> ${reaction.count} (${reaction.reactors.join(', ')})
+                </li>
+            `).join('') : `<li>${post._count.reactions} reaction(s)</li>`}
+        </ul>
+        
+        <h3>Comments:</h3>
+        <ul id="commentList">
+            ${comments.length > 0 ? comments.map(comment => `
+                <li>
+                    <p><strong>${comment.author.name}:</strong> ${comment.body}</p>
+                    <p><small>Posted on: ${new Date(comment.created).toLocaleDateString()}</small></p>
+                </li>
+            `).join('') : `<li>${post._count.comments} comment(s)</li>`}
+        </ul>
+
+        <div>
+            <textarea id="commentBody" placeholder="Write your comment here..."></textarea>
+            <button id="submitComment">Submit Comment</button>
+        </div>
+    `;
+
+    // Add event listener for the comment submission
+    document.getElementById('submitComment').addEventListener('click', () => submitComment(postId));
+}
+
+// Function to submit a comment
+async function submitComment(postId) {
+    const commentBody = document.getElementById('commentBody').value;
     const accessToken = localStorage.getItem('accessToken');
 
     if (!accessToken) {
-        console.error("No access token found");
-        showLoginMessage(); // User must be logged in
+        alert('You must be logged in to submit a comment.');
         return;
     }
 
-    // Decode the token to get user ID (Assuming it's stored in the sub field)
-    const userId = JSON.parse(atob(accessToken.split('.')[1])).sub; // Adjust according to your token's structure
-
-    console.log('User ID from token:', userId);  // Log the user ID for debugging
-    console.log('Post author ID:', post.author ? post.author.id : 'No author ID'); // Log the post author ID
-
-    // Check if the logged-in user ID matches the post's author ID
-    const isAuthor = post.author && post.author.id === userId;
-
-   // Populate post details
-    postDetailsContainer.innerHTML = `
-    <h2>${post.title}</h2>
-    ${post.media ? `
-        <img src="${post.media.url}" alt="${post.media.alt}" />
-    ` : ''}
-    <p><strong>By:</strong> ${post.author ? post.author.name : 'Unknown Author'}</p>
-    <p><strong>Published on:</strong> ${new Date(post.created).toLocaleDateString()}</p>
-    <p>${post.body}</p>
-    <p><strong>Categories:</strong> ${post.tags.join(', ')}</p>
-    `;
-
-    // Show edit and delete buttons if the user is the author
-    if (isAuthor) {
-        postDetailsContainer.innerHTML += `
-            <button id="editPost" data-id="${postId}">Edit</button>
-            <button id="deletePost" data-id="${postId}">Delete</button>
-        `;
-
-        document.getElementById('editPost').addEventListener('click', () => editPost(postId));
-        document.getElementById('deletePost').addEventListener('click', () => deletePost(postId));
-    } else {
-        console.log("User is not the author of this post."); // Log for debugging
+    if (!commentBody.trim()) {
+        alert('Comment cannot be empty.');
+        return;
     }
-}
-
-// Function to edit a post
-async function editPost(postId) {
-    const post = await fetchPostById(postId);
-    if (!post) return;
-
-    // Simple prompt for editing (for demonstration purposes)
-    const newTitle = prompt("Enter new title:", post.title);
-    const newBody = prompt("Enter new body:", post.body);
-    
-    if (newTitle && newBody) {
-        try {
-            const response = await fetch(`${API_SOCIAL_POSTS}/${postId}`, {
-                method: 'PUT',
-                headers: headers(),
-                body: JSON.stringify({
-                    title: newTitle,
-                    body: newBody,
-                    tags: post.tags, // Keep the same tags or update as needed
-                    media: post.media, // Keep the same media or update as needed
-                }),
-            });
-
-            if (!response.ok) {
-                throw new Error('Failed to update post');
-            }
-
-            const updatedPost = await response.json();
-            console.log('Post updated successfully:', updatedPost.data);
-            await showPost(); // Refresh the post view
-        } catch (error) {
-            console.error('Error updating post:', error);
-            alert('Failed to update post: ' + error.message);
-        }
-    }
-}
-
-// Function to delete a post
-async function deletePost(postId) {
-    const confirmed = confirm("Are you sure you want to delete this post?");
-    if (!confirmed) return;
 
     try {
-        const response = await fetch(`${API_SOCIAL_POSTS}/${postId}`, {
-            method: 'DELETE',
-            headers: headers(),
+        const response = await fetch(`${API_SOCIAL_POSTS}/${postId}/comment`, {
+            method: 'POST',
+            headers: {
+                ...headers(),
+                'Authorization': `Bearer ${accessToken}`,
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                data: {
+                    body: commentBody,
+                    replyToId: null, // Adjust if you are implementing replies
+                    postId: postId,
+                    owner: JSON.parse(atob(accessToken.split('.')[1])).sub, // Use the user ID from the token
+                },
+            }),
         });
 
         if (!response.ok) {
-            throw new Error('Failed to delete post');
+            throw new Error('Failed to submit comment');
         }
 
-        console.log('Post deleted successfully');
-        window.location.href = '/'; // Redirect to home or feed after deletion
+        // Clear the textarea
+        document.getElementById('commentBody').value = '';
+
+        // Optionally, refresh the post view to show the new comment
+        await showPost(); // Refresh the post to get updated comments
     } catch (error) {
-        console.error('Error deleting post:', error);
-        alert('Failed to delete post: ' + error.message);
+        console.error('Error submitting comment:', error);
+        alert('Failed to submit comment: ' + error.message);
     }
 }
 
@@ -166,3 +155,4 @@ async function init() {
         showLoginMessage(); // You must be logged in to see post
     }
 }
+

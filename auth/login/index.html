@@ -12,15 +12,15 @@
   <body>
     <h1>Login</h1>
 
-    <form name="login">
+    <form name="login" autocomplete="off">
       <div>
         <label for="email">Email</label>
-        <input id="email" type="email" name="email" required />
+        <input id="email" type="email" name="email" autocomplete="email" required />
       </div>
 
       <div>
         <label for="password">Password</label>
-        <input type="password" name="password" id="password" required />
+        <input id="password" type="password" name="password" autocomplete="current-password" required />
       </div>
 
       <!-- Error and success message containers -->

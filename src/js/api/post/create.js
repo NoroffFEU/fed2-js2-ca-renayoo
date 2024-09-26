@@ -1,25 +1,28 @@
 import { API_SOCIAL_POSTS } from '../constants.js'; 
 import { headers } from '../headers.js'; 
 
+//Create post
 export async function createPost({ title, body, tags, media }) {
     try {
         const postData = {
             title,
             body,
-            tags: tags.split(',').map(tag => tag.trim()),
-            media: {
-                url: media.url,
-                alt: media.alt,
-            },
+            tags: tags.split(',').map(tag => tag.trim())
         };
 
-
+        // Only add media if both url and alt text are provided
+        if (media.url && media.alt) {
+            postData.media = {
+                url: media.url,
+                alt: media.alt,
+            };
+        }
+        // Fetch api 
         const response = await fetch(API_SOCIAL_POSTS, {
             method: 'POST',
             headers: headers(true), 
             body: JSON.stringify(postData),
         });
-
 
         if (!response.ok) {
             const errorData = await response.json();
@@ -28,13 +31,13 @@ export async function createPost({ title, body, tags, media }) {
         }
 
         const responseData = await response.json();
-        console.log('Post created successfully:', responseData.data);
         return responseData.data;
     } catch (error) {
         console.error('Error creating post:', error);
         throw error;  
     }
 }
+
 
 // Event listener for creating a post
 document.addEventListener('DOMContentLoaded', () => {
@@ -50,22 +53,16 @@ document.addEventListener('DOMContentLoaded', () => {
             const mediaUrl = document.getElementById('media-url').value;
             const mediaAlt = document.getElementById('media-alt').value;
 
-            // Log the input values
-            console.log('Form Input Values:', { title, body, tags, mediaUrl, mediaAlt });
-
             try {
                 const createdPost = await createPost({
                     title,
                     body,
                     tags,
                     media: {
-                        url: mediaUrl,
-                        alt: mediaAlt,
+                        url: mediaUrl || null,  
+                        alt: mediaAlt || null,  
                     }
                 });
-
-                // Log the created post for verification
-                console.log('Created Post Data:', createdPost);
 
                 // Redirect or show confirmation message
                 window.location.href = '/'; 
@@ -76,3 +73,4 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 });
+
