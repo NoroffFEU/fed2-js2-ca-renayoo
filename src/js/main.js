@@ -38,7 +38,6 @@ async function fetchPosts() {
         }
 
         const responseData = await response.json();
-        console.log('Fetched Posts:', responseData.data); // Debugging output
         return responseData.data.slice(0, TOTAL_POSTS); // Limit to 60 posts
     } catch (error) {
         console.error('Error fetching posts:', error);

@@ -1,9 +1,8 @@
-import { headers } from '../headers.js'; // Ensure this imports correctly
-import { API_SOCIAL_POSTS } from '../constants.js'; // Make sure this points to your posts API URL
+import { headers } from '../headers.js'; 
+import { API_SOCIAL_POSTS } from '../constants.js'; 
 
-// Get the post ID from the URL (you may want to adjust this depending on how you're passing it)
+
 const postId = new URLSearchParams(window.location.search).get('id');
-const form = document.getElementById('edit-post-form');
 const titleInput = document.getElementById('title');
 const tagsInput = document.getElementById('tags');
 const mediaUrlInput = document.getElementById('media-url');
@@ -44,7 +43,7 @@ async function updatePost() {
     const updatedPost = {
         title: titleInput.value,
         body: bodyInput.value,
-        tags: tagsInput.value.split(',').map(tag => tag.trim()), // Convert to array
+        tags: tagsInput.value.split(',').map(tag => tag.trim()), 
         media: {
             url: mediaUrlInput.value,
             alt: mediaAltInput.value,

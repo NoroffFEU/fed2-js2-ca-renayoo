@@ -31,7 +31,6 @@ async function fetchPostById(postId) {
         }
 
         const responseData = await response.json();
-        console.log('Fetched post data:', responseData); 
         return responseData.data; 
     } catch (error) {
         console.error('Error fetching post:', error);
