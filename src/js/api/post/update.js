@@ -1,7 +1,6 @@
 import { headers } from '../headers.js'; 
 import { API_SOCIAL_POSTS } from '../constants.js'; 
 
-
 const postId = new URLSearchParams(window.location.search).get('id');
 const titleInput = document.getElementById('title');
 const tagsInput = document.getElementById('tags');
@@ -11,11 +10,11 @@ const bodyInput = document.getElementById('body');
 const saveButton = document.getElementById('save-changes-button');
 const deleteButton = document.getElementById('delete-button');
 
-// Fetch the post data and populate the form
+// Fetch post and populate the form
 async function fetchPost() {
     try {
         const response = await fetch(`${API_SOCIAL_POSTS}/${postId}`, {
-            headers: headers(),
+            headers: headers(), 
         });
         if (!response.ok) {
             throw new Error('Failed to fetch post');
@@ -28,35 +27,34 @@ async function fetchPost() {
     }
 }
 
-// Populate the form with post data
 function populateForm(post) {
     document.getElementById('post-id').value = post.id;
     titleInput.value = post.title;
-    tagsInput.value = post.tags.join(', ');
+    tagsInput.value = post.tags.join(', '); 
     mediaUrlInput.value = post.media.url;
     mediaAltInput.value = post.media.alt;
     bodyInput.value = post.body;
 }
 
-// Function to update a post
+// Update post function
 async function updatePost() {
     const updatedPost = {
         title: titleInput.value,
         body: bodyInput.value,
-        tags: tagsInput.value.split(',').map(tag => tag.trim()), 
+        tags: tagsInput.value.split(',').map(tag => tag.trim()),
         media: {
             url: mediaUrlInput.value,
             alt: mediaAltInput.value,
         },
     };
 
+    const requestHeaders = headers(true); // Pass true to set 'Content-Type'
+
+
     try {
         const response = await fetch(`${API_SOCIAL_POSTS}/${postId}`, {
             method: 'PUT',
-            headers: {
-                ...headers(),
-                'Content-Type': 'application/json',
-            },
+            headers: requestHeaders,
             body: JSON.stringify(updatedPost),
         });
 
@@ -72,7 +70,7 @@ async function updatePost() {
     }
 }
 
-// Function to delete a post
+// Delete post function
 async function deletePost() {
     const confirmation = confirm('Are you sure you want to delete this post?'); // Confirm action
     if (!confirmation) return;
@@ -80,7 +78,7 @@ async function deletePost() {
     try {
         const response = await fetch(`${API_SOCIAL_POSTS}/${postId}`, {
             method: 'DELETE',
-            headers: headers(),
+            headers: headers(), // Use the headers function
         });
 
         if (!response.ok) {
@@ -95,7 +93,7 @@ async function deletePost() {
     }
 }
 
-// Add event listeners
+// Event listeners
 saveButton.addEventListener('click', updatePost);
 deleteButton.addEventListener('click', deletePost);
 
