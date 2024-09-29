@@ -48,7 +48,7 @@ async function updatePost() {
         },
     };
 
-    const requestHeaders = headers(true); // Pass true to set 'Content-Type'
+    const requestHeaders = headers(true); 
 
 
     try {

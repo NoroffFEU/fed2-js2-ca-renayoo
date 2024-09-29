@@ -38,7 +38,6 @@ export async function createPost({ title, body, tags, media }) {
     }
 }
 
-
 // Event listener for creating a post
 document.addEventListener('DOMContentLoaded', () => {
     const form = document.getElementById('createPost');
