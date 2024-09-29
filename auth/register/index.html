@@ -1,55 +1,57 @@
 <!doctype html>
 <html lang="en">
-  <head>
+<head>
     <meta charset="UTF-8" />
-
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Noroff FED2 JS2 CA</title>
-    <script type="module" src="/src/app.js"></script>
-  </head>
-
-  <body>
+    <title>Noroff FED2 JS2 CA - Register</title>
+    <link rel="stylesheet" href="/src/css/style.css">
+    <script type="module" src="/src/js/api/auth/register.js" defer></script>
+</head>
+<body>
     <h1>Register</h1>
-
     <form name="register">
-      <div>
-        <label for="name">Name</label>
-        <input
-          id="name"
-          type="text"
-          name="name"
-          required
-          maxlength="20"
-          pattern="^[\w]+$"
-          title="Please enter a username using only letters and numbers"
-        />
-      </div>
-
-      <div>
-        <label for="email">Email</label>
-        <input
-          id="email"
-          type="email"
-          name="email"
-          required
-          pattern="^[\w\-.]+@(stud\.)?noroff\.no$"
-          title="Please enter a valid noroff.no or stud.noroff.no address"
-        />
-      </div>
-
-      <div>
-        <label for="password">Password</label>
-        <input
-          type="password"
-          name="password"
-          id="password"
-          required
-          minlength="8"
-        />
-      </div>
-
-      <a href="/auth/login/">Login</a>
-      <button>Register</button>
+        <div>
+            <label for="name">Name</label>
+            <input
+                id="name"
+                type="text"
+                name="name"
+                required
+                maxlength="20"
+                pattern="^[\w]+$"
+                title="Please enter a username using only letters and numbers"
+                autocomplete="username" 
+            />
+        </div>
+        <div>
+            <label for="email">Email</label>
+            <input
+                id="email"
+                type="email"
+                name="email"
+                required
+                pattern="^[\w\-.]+@(stud\.)?noroff\.no$"
+                title="Please enter a valid noroff.no or stud.noroff.no address"
+                autocomplete="email" 
+            />
+        </div>
+        <div>
+            <label for="password">Password</label>
+            <input
+                type="password"
+                name="password"
+                id="password"
+                required
+                minlength="8"
+                autocomplete="current-password" 
+            />
+        </div>
+        <!-- Error and success messages -->
+        <div id="errorMessages" style="color: red;"></div>
+        <div id="successMessages" style="color: green;"></div>
+        <a href="/auth/login/">Login</a>
+        <button type="submit">Register</button>
     </form>
-  </body>
+</body>
 </html>
+
