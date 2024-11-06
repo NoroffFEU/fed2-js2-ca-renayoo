@@ -2,17 +2,34 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Noroff FED2 JS2 CA</title>
-    <script type="module" src="/src/app.js"></script>
+    <title>Profile</title>
+    <script type="module" src="/src/js/api/profile/read.js" defer></script>
     <link rel="stylesheet" href="/src/css/style.css">
   </head>
   <body>
-    <h1>Profile</h1>
+    <h1>User Profile</h1>
+    <div id="profile-container">
+      <div id="banner-container">
+        <img id="banner" src="" alt="Profile Banner" />
+      </div>
+      <div id="avatar-container">
+        <img id="avatar" src="" alt="Profile Avatar" />
+      </div>
+      <h2 id="name"></h2>
+      <p id="email"></p>
+      <p id="bio"></p>
+      <div id="profile-counts">
+        <p>Posts: <span id="posts-count">0</span></p>
+        <p>Followers: <span id="followers-count">0</span></p>
+        <p>Following: <span id="following-count">0</span></p>
+      </div>
+      <div id="posts-list"></div>
+      <div id="pagination"></div>
+    </div>
 
     <form name="updateProfile">
-      <button>Update Profile</button>
+      <button type="button">Update Profile</button>
     </form>
   </body>
 </html>

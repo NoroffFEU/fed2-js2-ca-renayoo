@@ -5,12 +5,17 @@ document.addEventListener("DOMContentLoaded", function () {
     init(); 
 });
 
-// User logged in check localStorage
+// Check if user is logged in
 function isUserLoggedIn() {
     return !!localStorage.getItem('accessToken');
 }
 
-// If not logged in, show this message 
+// Get logged-in user's ID (assuming it's stored in localStorage)
+function getLoggedInUserId() {
+    return localStorage.getItem('userId');
+}
+
+// Show login message if user is not logged in
 function showLoginMessage() {
     const postDetailsContainer = document.querySelector('.post-details');
     postDetailsContainer.innerHTML = `
@@ -18,10 +23,10 @@ function showLoginMessage() {
     `;
 }
 
-// Fetch ID post
+// Fetch post by ID with _author flag to get author details
 async function fetchPostById(postId) {
     try {
-        const response = await fetch(`${API_SOCIAL_POSTS}/${postId}`, {
+        const response = await fetch(`${API_SOCIAL_POSTS}/${postId}?_author=true&_comments=true&_reactions=true`, {
             method: 'GET',
             headers: headers(), 
         });
@@ -38,7 +43,12 @@ async function fetchPostById(postId) {
     }
 }
 
-// Display a specific post by ID
+// Retrieve logged-in user's name from localStorage
+function getLoggedInUserName() {
+    return localStorage.getItem('name');
+}
+
+// Display specific post by ID
 async function showPost() {
     const postDetailsContainer = document.querySelector('.post-details');
     const urlParams = new URLSearchParams(window.location.search);
@@ -49,15 +59,15 @@ async function showPost() {
         return;
     }
 
-    const post = await fetchPostById(postId); // Fetch the specific post
+    const post = await fetchPostById(postId);
 
     if (!post) {
         postDetailsContainer.innerHTML = '<h2>Post not found.</h2>';
         return;
     }
 
-    const reactions = Array.isArray(post.reactions) ? post.reactions : [];
-    const commentsCount = post._count.comments || 0;
+    const loggedInUserName = getLoggedInUserName();
+    const isOwner = post.author && post.author.name === loggedInUserName;
 
     // Populate post details
     postDetailsContainer.innerHTML = `
@@ -65,18 +75,20 @@ async function showPost() {
         ${post.media ? `<img src="${post.media.url}" alt="${post.media.alt}" />` : ''}
         <p><strong>Published on:</strong> ${new Date(post.created).toLocaleDateString()}</p>
         <p><strong>Last Updated on:</strong> ${new Date(post.updated).toLocaleDateString()}</p>
+        <p><strong>Author:</strong> ${post.author ? post.author.name : 'Unknown'}</p>
         <p><strong>Body:</strong> ${post.body}</p>
         <p><strong>Categories:</strong> ${post.tags.join(', ')}</p>
 
-        <!-- Edit and Delete buttons -->
-        <div>
-            <button id="editPost">Edit Post</button>
-            <button id="deletePost">Delete Post</button>
-        </div>
+        ${isOwner ? `
+            <div>
+                <button id="editPost">Edit Post</button>
+                <button id="deletePost">Delete Post</button>
+            </div>
+        ` : ''}
 
         <h3>Reactions:</h3>
         <ul>
-            ${reactions.length > 0 ? reactions.map(reaction => `
+            ${post.reactions.length > 0 ? post.reactions.map(reaction => `
                 <li>
                     <strong>${reaction.symbol}:</strong> ${reaction.count} (${reaction.reactors.join(', ')})
                 </li>
@@ -84,22 +96,24 @@ async function showPost() {
         </ul>
 
         <h3>Comments:</h3>
-        <p>${commentsCount} comment(s)</p>
+        <p>${post._count.comments} comment(s)</p>
     `;
 
-    // Event listeners 
-    document.getElementById('deletePost').addEventListener('click', () => deletePost(postId));
-    document.getElementById('editPost').addEventListener('click', () => {
-        window.location.href = `/post/edit/index.html?id=${postId}`;
-    });
+    if (isOwner) {
+        document.getElementById('deletePost').addEventListener('click', () => deletePost(postId));
+        document.getElementById('editPost').addEventListener('click', () => {
+            window.location.href = `/post/edit/index.html?id=${postId}`;
+        });
+    }
 }
+
 
 // Initialize function
 async function init() {
     if (isUserLoggedIn()) {
-        await showPost(); // Showing post with specific ID
+        await showPost(); // Show the post with specific ID
     } else {
-        showLoginMessage(); // You must be logged in to see post
+        showLoginMessage(); // User must be logged in to see the post
     }
 }
 
@@ -125,3 +139,4 @@ async function deletePost(postId) {
         alert('Failed to delete post: ' + error.message);
     }
 }
+

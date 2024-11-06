@@ -58,9 +58,12 @@ async function loginUser({ email, password }) {
         if (accessToken) {
             localStorage.setItem("accessToken", accessToken);
             
-            // Extract and store userId (assuming it is part of the JWT payload)
-            const userId = JSON.parse(atob(accessToken.split('.')[1])).sub; // Adjust based on your token structure
+            // Extract and store userId and name (assuming 'name' is part of the JWT payload)
+            const tokenPayload = JSON.parse(atob(accessToken.split('.')[1]));  // Decode JWT token
+            const userId = tokenPayload.sub;  // Adjust based on your token structure
+            const name = tokenPayload.name;  // Assuming 'name' is part of the payload
             localStorage.setItem('userId', userId);
+            localStorage.setItem('name', name);  // Store the name
         } else {
             console.error('Access token not found in response.');
         }
@@ -76,5 +79,4 @@ async function loginUser({ email, password }) {
         throw error;
     }
 }
-
 
