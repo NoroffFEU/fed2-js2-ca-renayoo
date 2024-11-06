@@ -2,7 +2,7 @@ import { API_SOCIAL_POSTS } from '../constants.js';
 import { headers } from '../headers.js'; 
 
 document.addEventListener("DOMContentLoaded", function () {
-    showPost(); // Directly call showPost when DOM content is loaded
+    init(); 
 });
 
 // Check if user is logged in
@@ -193,6 +193,7 @@ async function addReactionToPost(postId, symbol) {
     }
 }
 
+
 // Submit comment to post
 async function submitComment(postId, commentBody, replyToId = null) {
     try {
@@ -204,8 +205,6 @@ async function submitComment(postId, commentBody, replyToId = null) {
 
         // Retrieve the token from localStorage (or wherever you store it)
         const token = localStorage.getItem('accessToken');
-        console.log('Access Token:', token); // Log the token to verify it's available
-
         if (!token) {
             alert("You must be logged in to comment.");
             return;
@@ -217,7 +216,8 @@ async function submitComment(postId, commentBody, replyToId = null) {
             replyToId: (typeof replyToId === 'number' || replyToId === null) ? replyToId : null // Ensure it's a number or null
         };
 
-        console.log('Request Body:', requestBody); // Log request body for debugging
+        // Log request body to check the structure
+        console.log('Request Body:', requestBody);
 
         // Send the POST request to submit the comment
         const response = await fetch(`${API_SOCIAL_POSTS}/${postId}/comment`, {
@@ -231,70 +231,55 @@ async function submitComment(postId, commentBody, replyToId = null) {
 
         // Check if the response was successful
         if (!response.ok) {
-            const errorDetails = await response.text();
-            console.error('Error details:', errorDetails); // Log server's error response
+            const errorResponse = await response.json();
+            console.error('Error response:', errorResponse);
+            // Log each error in the 'errors' array for better debugging
+            if (errorResponse.errors && errorResponse.errors.length > 0) {
+                errorResponse.errors.forEach(err => {
+                    console.error('Error detail:', err);
+                });
+            }
             throw new Error('Failed to submit comment');
         }
 
-        const responseData = await response.json();
-        console.log('Comment submitted successfully:', responseData);
+        // Successfully submitted the comment
+        console.log("Comment submitted successfully");
     } catch (error) {
         console.error('Error submitting comment:', error);
+        alert('Error submitting comment: ' + error.message);
     }
 }
 
-// Submit reply to a comment
-async function submitReply(postId, commentId, replyBody) {
-    try {
-        const token = localStorage.getItem('accessToken');
-        if (!token) {
-            alert("You must be logged in to reply.");
-            return;
-        }
 
-        const response = await fetch(`${API_SOCIAL_POSTS}/${postId}/comment/${commentId}/reply`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}`
-            },
-            body: JSON.stringify({ body: replyBody })
-        });
-
-        if (!response.ok) {
-            throw new Error('Failed to submit reply');
-        }
-
-        const replyData = await response.json();
-        console.log('Reply submitted successfully:', replyData);
-    } catch (error) {
-        console.error('Error submitting reply:', error);
+// Initialize function
+async function init() {
+    if (isUserLoggedIn()) {
+        await showPost(); // Show the post with specific ID
+    } else {
+        showLoginMessage(); // User must be logged in to see the post
     }
 }
 
-// Delete post
+// Function to delete a post
 async function deletePost(postId) {
-    try {
-        const token = localStorage.getItem('accessToken');
-        if (!token) {
-            alert("You must be logged in to delete the post.");
-            return;
-        }
+    const confirmation = confirm('Are you sure you want to delete this post?'); // Confirm action
+    if (!confirmation) return;
 
+    try {
         const response = await fetch(`${API_SOCIAL_POSTS}/${postId}`, {
             method: 'DELETE',
-            headers: {
-                'Authorization': `Bearer ${token}`
-            }
+            headers: headers(),
         });
 
         if (!response.ok) {
             throw new Error('Failed to delete post');
         }
 
-        alert('Post deleted successfully');
+        alert('Post deleted successfully!');
         window.location.href = '/'; // Redirect to home page after deletion
     } catch (error) {
         console.error('Error deleting post:', error);
+        alert('Failed to delete post: ' + error.message);
     }
 }
+
