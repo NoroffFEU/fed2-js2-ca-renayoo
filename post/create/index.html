@@ -5,27 +5,47 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Create a New Post</title>
     <link rel="stylesheet" href="/src/css/style.css">
-    <link rel="stylesheet" href="/src/css/create.css">
     <script type="module" src="/src/js/api/post/create.js" defer></script>
 </head>
-<body>
-    <h1>Create a New Post</h1>
-    <form id="createPost">
+<body class="bg-gray-100">
+
+    <!-- Page Header -->
+    <h1 class="text-3xl font-bold text-center mt-12 text-gray-800">Create a New Post</h1>
+    
+    <!-- Form Container -->
+    <form id="createPost" class="max-w-3xl mx-auto p-8 bg-white rounded-lg shadow-xl mt-8">
         <input type="hidden" id="post-id" />
-        <label for="title">Title:</label>
-        <input type="text" id="title" />
-        <label for="tags">Categories (comma-separated):</label>
-        <input type="text" id="tags" />
-        <label for="media-url">Media URL:</label>
-        <input type="text" id="media-url" />
-        <label for="media-alt">Media Alt Text:</label>
-        <input type="text" id="media-alt" />
-        <label for="body">Content:</label>
-        <textarea id="body" required></textarea>
-        <div class="button-container">
-            <button type="submit" id="publishButton">Publish Post</button>
+
+        <!-- Title Field -->
+        <label for="title" class="block text-xl font-medium text-gray-700 mt-4">Title:</label>
+        <input type="text" id="title" class="w-full px-4 py-2 border border-gray-300 rounded-lg mt-2 focus:ring-2 focus:ring-blue-500 focus:outline-none" />
+
+        <!-- Tags (Categories) Field -->
+        <label for="tags" class="block text-xl font-medium text-gray-700 mt-4">Categories (comma-separated):</label>
+        <input type="text" id="tags" class="w-full px-4 py-2 border border-gray-300 rounded-lg mt-2 focus:ring-2 focus:ring-blue-500 focus:outline-none" />
+
+        <!-- Media URL Field -->
+        <label for="media-url" class="block text-xl font-medium text-gray-700 mt-4">Media URL:</label>
+        <input type="text" id="media-url" class="w-full px-4 py-2 border border-gray-300 rounded-lg mt-2 focus:ring-2 focus:ring-blue-500 focus:outline-none" />
+
+        <!-- Media Alt Text Field -->
+        <label for="media-alt" class="block text-xl font-medium text-gray-700 mt-4">Media Alt Text:</label>
+        <input type="text" id="media-alt" class="w-full px-4 py-2 border border-gray-300 rounded-lg mt-2 focus:ring-2 focus:ring-blue-500 focus:outline-none" />
+
+        <!-- Body Content Field -->
+        <label for="body" class="block text-xl font-medium text-gray-700 mt-4">Content:</label>
+        <textarea id="body" required class="w-full px-4 py-2 border border-gray-300 rounded-lg mt-2 focus:ring-2 focus:ring-blue-500 focus:outline-none h-40 resize-none"></textarea>
+
+        <!-- Publish Button -->
+        <div class="mt-6">
+            <button type="submit" id="publishButton" class="w-full py-3 bg-blue-500 text-white font-semibold rounded-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                Publish Post
+            </button>
         </div>
     </form>
-    <a href="/">Back to feed</a>
+
+    <!-- Back Link -->
+    <a href="/" class="block text-center mt-6 text-blue-500 hover:underline">Back to feed</a>
+
 </body>
 </html>

@@ -55,6 +55,7 @@ async function showFeed() {
     renderPagination();
 }
 
+// Function to render posts based on the current page
 function renderPosts() {
     const feedContainer = document.querySelector('.feed');
     feedContainer.innerHTML = `
@@ -175,38 +176,18 @@ function renderPosts() {
     });
 }
 
-
-// Update the reaction count in the backend
-async function addReactionToPost(postId, symbol) {
-    try {
-        // Send a PUT request to update the reaction for the post
-        const response = await fetch(`${API_SOCIAL_POSTS}/${postId}/react/${symbol}`, {
-            method: 'PUT',
-            headers: headers(),
-        });
-
-        if (!response.ok) {
-            throw new Error('Failed to add reaction');
-        }
-
-        // Optionally, you can refresh the posts or just update the reaction count for the current post
-        // This should ideally be handled by the server to update the correct post.
-    } catch (error) {
-        console.error('Error adding reaction:', error);
-    }
-}
-
-
+// Pagination rendering logic
 function renderPagination() {
     const feedContainer = document.querySelector('.feed');
     const paginationContainer = document.createElement('div');
-    paginationContainer.className = 'pagination';
-    
+    paginationContainer.className = 'pagination mt-4 flex justify-center space-x-2';
+
     const totalPages = Math.ceil(allPosts.length / POSTS_PER_PAGE);
-    
+
     // Create previous button
     const prevButton = document.createElement('button');
     prevButton.textContent = 'Previous';
+    prevButton.className = 'bg-gray-300 p-2 rounded';
     prevButton.disabled = currentPage === 1; // Disable if on the first page
     prevButton.addEventListener('click', () => {
         if (currentPage > 1) {
@@ -216,14 +197,13 @@ function renderPagination() {
             scrollToTop(); // Scroll to top on page change
         }
     });
-    
     paginationContainer.appendChild(prevButton);
-    
+
     // Create page number buttons
     for (let i = 1; i <= totalPages; i++) {
         const pageButton = document.createElement('button');
         pageButton.textContent = i;
-        pageButton.className = (i === currentPage) ? 'active' : '';
+        pageButton.className = (i === currentPage) ? 'bg-blue-500 text-white p-2 rounded' : 'bg-gray-300 p-2 rounded';
         pageButton.addEventListener('click', () => {
             currentPage = i;
             renderPosts();
@@ -232,10 +212,11 @@ function renderPagination() {
         });
         paginationContainer.appendChild(pageButton);
     }
-    
+
     // Create next button
     const nextButton = document.createElement('button');
     nextButton.textContent = 'Next';
+    nextButton.className = 'bg-gray-300 p-2 rounded';
     nextButton.disabled = currentPage === totalPages; // Disable if on the last page
     nextButton.addEventListener('click', () => {
         if (currentPage < totalPages) {
@@ -245,8 +226,9 @@ function renderPagination() {
             scrollToTop(); // Scroll to top on page change
         }
     });
-    
     paginationContainer.appendChild(nextButton);
+
+    // Append the pagination container to the feed
     feedContainer.appendChild(paginationContainer);
 }
 
@@ -258,70 +240,41 @@ function scrollToTop() {
     });
 }
 
-export function setupLogoutButton() {
+// Function to update the reaction count on the server
+async function addReactionToPost(postId, symbol) {
+    try {
+        const response = await fetch(`${API_SOCIAL_POSTS}/${postId}/react/${symbol}`, {
+            method: 'PUT',
+            headers: headers(),
+        });
+
+        if (!response.ok) {
+            throw new Error('Failed to add reaction');
+        }
+    } catch (error) {
+        console.error('Error adding reaction:', error);
+    }
+}
+
+// Function to set up logout button functionality
+function setupLogoutButton() {
     const logoutButton = document.getElementById('logout');
     if (logoutButton) {
-        logoutButton.addEventListener('click', async function () {
-            await handleLogout();
+        logoutButton.addEventListener('click', () => {
+            localStorage.removeItem('accessToken');
+            location.reload(); // Refresh the page after logging out
         });
-    } else {
-        console.warn('Logout button not found');
     }
 }
 
-
-async function handleLogout() {
-    try {
-        // Remove access token and other login-related data
-        localStorage.removeItem('accessToken');
-        localStorage.removeItem('username');
-        // Show login message and update the menu
+// Initialize the app
+function init() {
+    if (isUserLoggedIn()) {
+        showFeed();
+    } else {
         showLoginMessage();
-        updateMenuForLoggedOutUser();
-    } catch (error) {
-        console.error("Error during logout:", error);
     }
 }
 
-function updateMenuForLoggedOutUser() {
-    const publishPostLink = document.querySelector('.SM-menu a[href="/post/create/index.html"]');
-    const loginLink = document.querySelector('.SM-menu a[href="/auth/login/"]');
-    const registerLink = document.querySelector('.SM-menu a[href="/auth/register/"]');
-    const profileLink = document.querySelector('.SM-menu a[href="/profile/"]');
-    const logoutButton = document.getElementById('logout');
-
-    // Hide publish post link and profile link, show login and register links
-    if (publishPostLink) publishPostLink.style.display = 'none';
-    if (loginLink) loginLink.style.display = 'inline';
-    if (registerLink) registerLink.style.display = 'inline';
-    if (profileLink) profileLink.style.display = 'none';
-    if (logoutButton) logoutButton.style.display = 'none';
-}
-
-function updateMenuForLoggedInUser() {
-    const publishPostLink = document.querySelector('.SM-menu a[href="/post/create/index.html"]');
-    const loginLink = document.querySelector('.SM-menu a[href="/auth/login/"]');
-    const registerLink = document.querySelector('.SM-menu a[href="/auth/register/"]');
-    const profileLink = document.querySelector('.SM-menu a[href="/profile/"]');
-    const logoutButton = document.getElementById('logout');
-
-    // Show publish post link, profile link, and logout button, hide login and register links
-    if (publishPostLink) publishPostLink.style.display = 'inline';
-    if (loginLink) loginLink.style.display = 'none';
-    if (registerLink) registerLink.style.display = 'none';
-    if (profileLink) profileLink.style.display = 'inline';
-    if (logoutButton) logoutButton.style.display = 'inline';
-}
-
-async function init() {
-    const userIsLoggedIn = isUserLoggedIn();
-    
-    if (!userIsLoggedIn) {
-        showLoginMessage(); 
-    } else {
-        await showFeed(); 
-        updateMenuForLoggedInUser();
-    }
-}
 
 
