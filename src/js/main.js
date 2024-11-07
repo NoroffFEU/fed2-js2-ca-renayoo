@@ -60,7 +60,7 @@ function renderPosts() {
     feedContainer.innerHTML = `
         <h2>New posts</h2>
         <p>Most recent posts:</p>
-        <ul id="posts-container" class="posts-container"></ul>
+        <div id="posts-container" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4"></div>
     `;
 
     const postsContainer = document.getElementById('posts-container');
@@ -72,69 +72,130 @@ function renderPosts() {
     const postsToDisplay = allPosts.slice(startIndex, endIndex);
 
     if (postsToDisplay.length === 0) {
-        postsContainer.innerHTML = '<li>No posts available.</li>';
+        postsContainer.innerHTML = '<div>No posts available.</div>';
         return;
     }
 
     postsToDisplay.forEach(post => {
-        const postElement = document.createElement('li');
-        postElement.className = 'post';
-    
+        // Ensure reactions object is initialized
+        if (!post.reactions) {
+            post.reactions = {}; // Initialize if not present
+        }
+
+        // Initialize reaction counts for each symbol if not already initialized
+        const reactionSymbols = ['👍', '❤️', '😂', '😮', '😢', '😡'];
+        reactionSymbols.forEach(symbol => {
+            if (post.reactions[symbol] === undefined) {
+                post.reactions[symbol] = 0; // Default to 0 if not present
+            }
+        });
+
+        const postElement = document.createElement('div');
+        postElement.className = 'post bg-white p-4 rounded-lg shadow-md';
+
         const titleElement = document.createElement('h4');
-        titleElement.className = 'post-title';
+        titleElement.className = 'post-title text-xl font-semibold';
         titleElement.textContent = post.title;
-    
+
         const dateElement = document.createElement('p');
-        dateElement.className = 'post-date';
+        dateElement.className = 'post-date text-gray-500 text-sm';
         const date = new Date(post.created);
         dateElement.textContent = `Published on: ${date.toLocaleDateString()}`;
-    
-        // Image handling
+
+        // Image handling (clickable)
         if (post.media && post.media.url) {
             const imgElement = document.createElement('img');
-            imgElement.src = post.media.url; 
-            imgElement.alt = post.media.alt || 'Post image'; 
+            imgElement.src = post.media.url;
+            imgElement.alt = post.media.alt || 'Post image';
+            imgElement.className = 'w-full h-48 object-cover rounded-md cursor-pointer'; // Added cursor-pointer for clickability
             imgElement.addEventListener('click', () => {
-                window.location.href = `/post/index.html?id=${post.id}`;
+                window.location.href = `/post/index.html?id=${post.id}`; // Redirect to the post when image is clicked
             });
             postElement.appendChild(imgElement);
         }
-    
+
         const bodyElement = document.createElement('p');
-        bodyElement.className = 'post-body';
+        bodyElement.className = 'post-body text-gray-700 mt-2';
         bodyElement.textContent = post.body;
-    
+
         const tagsElement = document.createElement('p');
-        tagsElement.className = 'post-tags';
+        tagsElement.className = 'post-tags text-gray-500 text-sm';
         tagsElement.textContent = `Categories: ${post.tags.join(', ')}`;
-        
-        // Comments and reactions count
+
+        // Comments count
         const commentsCountElement = document.createElement('p');
-        commentsCountElement.className = 'post-comments-count';
+        commentsCountElement.className = 'post-comments-count text-gray-500 text-sm';
         commentsCountElement.textContent = `Comments: ${post._count.comments || 0}`;
 
-        const reactionsCountElement = document.createElement('p');
-        reactionsCountElement.className = 'post-reactions-count';
-        reactionsCountElement.textContent = `Reactions: ${post._count.reactions || 0}`;
-    
+        // Reaction buttons and their counts
+        const reactionsSection = document.createElement('div');
+        reactionsSection.className = 'reaction-buttons flex space-x-2 mt-2';
+
+        reactionSymbols.forEach(symbol => {
+            const reactionButton = document.createElement('button');
+            reactionButton.className = 'reaction-button bg-gray-200 text-lg p-2 rounded';
+            reactionButton.textContent = symbol;
+
+            // Create a counter display for each reaction
+            const reactionCountElement = document.createElement('span');
+            reactionCountElement.className = 'reaction-count text-sm ml-2';
+            reactionCountElement.textContent = post.reactions[symbol]; // Use the reaction count for the symbol
+
+            reactionButton.appendChild(reactionCountElement);
+
+            // Add event listener to handle click
+            reactionButton.setAttribute('data-symbol', symbol);
+            reactionButton.addEventListener('click', async function () {
+                // Update the reaction count on the server
+                await addReactionToPost(post.id, symbol);
+
+                // Update the counter dynamically without reloading
+                reactionCountElement.textContent = (parseInt(reactionCountElement.textContent) + 1);
+            });
+
+            reactionsSection.appendChild(reactionButton);
+        });
+
         const viewPostButton = document.createElement('button');
         viewPostButton.textContent = 'View Post';
-        viewPostButton.className = 'view-post-button';
+        viewPostButton.className = 'view-post-button mt-4 bg-blue-500 text-white p-2 rounded-md';
         viewPostButton.addEventListener('click', () => {
             window.location.href = `/post/index.html?id=${post.id}`;
         });
-    
+
         postElement.appendChild(titleElement);
-        postElement.appendChild(dateElement); 
+        postElement.appendChild(dateElement);
         postElement.appendChild(bodyElement);
         postElement.appendChild(tagsElement);
         postElement.appendChild(commentsCountElement);
-        postElement.appendChild(reactionsCountElement);
+        postElement.appendChild(reactionsSection); // Append reactions section
         postElement.appendChild(viewPostButton);
-    
+
         postsContainer.appendChild(postElement);
-    });    
+    });
 }
+
+
+// Update the reaction count in the backend
+async function addReactionToPost(postId, symbol) {
+    try {
+        // Send a PUT request to update the reaction for the post
+        const response = await fetch(`${API_SOCIAL_POSTS}/${postId}/react/${symbol}`, {
+            method: 'PUT',
+            headers: headers(),
+        });
+
+        if (!response.ok) {
+            throw new Error('Failed to add reaction');
+        }
+
+        // Optionally, you can refresh the posts or just update the reaction count for the current post
+        // This should ideally be handled by the server to update the correct post.
+    } catch (error) {
+        console.error('Error adding reaction:', error);
+    }
+}
+
 
 function renderPagination() {
     const feedContainer = document.querySelector('.feed');
@@ -197,10 +258,24 @@ function scrollToTop() {
     });
 }
 
+export function setupLogoutButton() {
+    const logoutButton = document.getElementById('logout');
+    if (logoutButton) {
+        logoutButton.addEventListener('click', async function () {
+            await handleLogout();
+        });
+    } else {
+        console.warn('Logout button not found');
+    }
+}
+
+
 async function handleLogout() {
     try {
+        // Remove access token and other login-related data
         localStorage.removeItem('accessToken');
-        localStorage.removeItem('username'); 
+        localStorage.removeItem('username');
+        // Show login message and update the menu
         showLoginMessage();
         updateMenuForLoggedOutUser();
     } catch (error) {
@@ -208,18 +283,6 @@ async function handleLogout() {
     }
 }
 
-function setupLogoutButton() {
-    const logoutButton = document.getElementById('logout');
-    if (logoutButton) {
-        logoutButton.addEventListener('click', async function () {
-            await handleLogout();
-        });
-    } else {
-        console.warn('Logout button not found'); 
-    }
-}
-
-// Updated menu for logged out user
 function updateMenuForLoggedOutUser() {
     const publishPostLink = document.querySelector('.SM-menu a[href="/post/create/index.html"]');
     const loginLink = document.querySelector('.SM-menu a[href="/auth/login/"]');
@@ -227,14 +290,14 @@ function updateMenuForLoggedOutUser() {
     const profileLink = document.querySelector('.SM-menu a[href="/profile/"]');
     const logoutButton = document.getElementById('logout');
 
-    if (publishPostLink) publishPostLink.style.display = 'none'; 
-    if (loginLink) loginLink.style.display = 'inline'; 
-    if (registerLink) registerLink.style.display = 'inline'; 
-    if (profileLink) profileLink.style.display = 'none'; 
-    if (logoutButton) logoutButton.style.display = 'none'; 
+    // Hide publish post link and profile link, show login and register links
+    if (publishPostLink) publishPostLink.style.display = 'none';
+    if (loginLink) loginLink.style.display = 'inline';
+    if (registerLink) registerLink.style.display = 'inline';
+    if (profileLink) profileLink.style.display = 'none';
+    if (logoutButton) logoutButton.style.display = 'none';
 }
 
-// Showing and hiding menu for logged in user
 function updateMenuForLoggedInUser() {
     const publishPostLink = document.querySelector('.SM-menu a[href="/post/create/index.html"]');
     const loginLink = document.querySelector('.SM-menu a[href="/auth/login/"]');
@@ -242,11 +305,12 @@ function updateMenuForLoggedInUser() {
     const profileLink = document.querySelector('.SM-menu a[href="/profile/"]');
     const logoutButton = document.getElementById('logout');
 
-    if (publishPostLink) publishPostLink.style.display = 'inline'; 
-    if (loginLink) loginLink.style.display = 'none'; 
-    if (registerLink) registerLink.style.display = 'none'; 
-    if (profileLink) profileLink.style.display = 'inline'; 
-    if (logoutButton) logoutButton.style.display = 'inline'; 
+    // Show publish post link, profile link, and logout button, hide login and register links
+    if (publishPostLink) publishPostLink.style.display = 'inline';
+    if (loginLink) loginLink.style.display = 'none';
+    if (registerLink) registerLink.style.display = 'none';
+    if (profileLink) profileLink.style.display = 'inline';
+    if (logoutButton) logoutButton.style.display = 'inline';
 }
 
 async function init() {
@@ -259,8 +323,5 @@ async function init() {
         updateMenuForLoggedInUser();
     }
 }
-
-
-
 
 
