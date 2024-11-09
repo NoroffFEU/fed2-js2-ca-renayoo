@@ -49,6 +49,7 @@ function getLoggedInUserName() {
 }
 
 // Display specific post by ID
+// Display specific post by ID
 async function showPost() {
     const postDetailsContainer = document.querySelector('.post-details');
     const urlParams = new URLSearchParams(window.location.search);
@@ -81,8 +82,8 @@ async function showPost() {
 
         ${isOwner ? `
             <div>
-                <button id="editPost">Edit Post</button>
-                <button id="deletePost">Delete Post</button>
+                <button id="editPost" class="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 transition">Edit Post</button>
+                <button id="deletePost" class="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 transition">Delete Post</button>
             </div>
         ` : ''}
 
@@ -282,4 +283,3 @@ async function deletePost(postId) {
         alert('Failed to delete post: ' + error.message);
     }
 }
-

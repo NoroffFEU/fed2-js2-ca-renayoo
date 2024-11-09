@@ -7,7 +7,7 @@ export default {
   theme: {
     extend: {
       colors: {
-        'custom-blue': '#af2d00',  
+        'custom-blue': '#774fff',  
       },
       spacing: {
         '128': '32rem', 
