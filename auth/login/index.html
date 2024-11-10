@@ -4,31 +4,39 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Noroff FED2 JS2 CA</title>
-    <script type="module" src="/src/app.js"></script>
     <link rel="stylesheet" href="/src/css/style.css">
     <script type="module" src="/src/js/api/auth/login.js" defer></script>
   </head>
 
   <body>
-    <h1>Login</h1>
+    <!-- Flex container to center the form -->
+    <div class="center-wrapper">
+      <div class="login-container">
+        <h1 class="login-title">Login</h1>
+        <h2 class="description">Noroff Social Media</h2>
 
-    <form name="login" autocomplete="off">
-      <div>
-        <label for="email">Email</label>
-        <input id="email" type="email" name="email" autocomplete="email" required />
+        <form name="login" autocomplete="off">
+          <div class="mb-4">
+            <label for="email" class="block text-sm font-medium text-gray-700">Email</label>
+            <input id="email" type="email" name="email" autocomplete="email" required class="form-input"/>
+          </div>
+
+          <div class="mb-6">
+            <label for="password" class="block text-sm font-medium text-gray-700">Password</label>
+            <input id="password" type="password" name="password" autocomplete="current-password" required class="form-input"/>
+          </div>
+
+          <!-- Error and success message containers -->
+          <div id="errorMessages" class="message error-message"></div>
+          <div id="successMessages" class="message success-message"></div>
+
+          <a href="/auth/register/" class="register-link">New User? Register Here</a>
+
+          <button type="submit" class="login-button">
+            Login
+          </button>
+        </form>
       </div>
-
-      <div>
-        <label for="password">Password</label>
-        <input id="password" type="password" name="password" autocomplete="current-password" required />
-      </div>
-
-      <!-- Error and success message containers -->
-      <div id="errorMessages" style="color: red;"></div>
-      <div id="successMessages" style="color: green;"></div>
-
-      <a href="/auth/register/">Register</a>
-      <button type="submit">Login</button>
-    </form>
+    </div>
   </body>
 </html>

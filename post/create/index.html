@@ -5,27 +5,47 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Create a New Post</title>
     <link rel="stylesheet" href="/src/css/style.css">
-    <link rel="stylesheet" href="/src/css/create.css">
     <script type="module" src="/src/js/api/post/create.js" defer></script>
 </head>
-<body>
-    <h1>Create a New Post</h1>
-    <form id="createPost">
+<body class="bg-lilac-200">
+
+    <!-- Page Header -->
+    <h1 class="text-3xl font-bold text-center mt-12 text-gray-800">Create a New Post</h1>
+    
+    <!-- Form Container -->
+    <form id="createPost" class="form-container">
         <input type="hidden" id="post-id" />
-        <label for="title">Title:</label>
-        <input type="text" id="title" />
-        <label for="tags">Categories (comma-separated):</label>
-        <input type="text" id="tags" />
-        <label for="media-url">Media URL:</label>
-        <input type="text" id="media-url" />
-        <label for="media-alt">Media Alt Text:</label>
-        <input type="text" id="media-alt" />
-        <label for="body">Content:</label>
-        <textarea id="body" required></textarea>
-        <div class="button-container">
-            <button type="submit" id="publishButton">Publish Post</button>
+
+        <!-- Title Field -->
+        <label for="title" class="form-label">Title:</label>
+        <input type="text" id="title" class="form-input" />
+
+        <!-- Tags (Categories) Field -->
+        <label for="tags" class="form-label">Categories (comma-separated):</label>
+        <input type="text" id="tags" class="form-input" />
+
+        <!-- Media URL Field -->
+        <label for="media-url" class="form-label">Media URL:</label>
+        <input type="text" id="media-url" class="form-input" />
+
+        <!-- Media Alt Text Field -->
+        <label for="media-alt" class="form-label">Media Alt Text:</label>
+        <input type="text" id="media-alt" class="form-input" />
+
+        <!-- Body Content Field -->
+        <label for="body" class="form-label">Content:</label>
+        <textarea id="body" required class="form-textarea"></textarea>
+
+        <!-- Publish Button -->
+        <div class="form-button-container">
+            <button type="submit" id="publishButton" class="form-submit-button">
+                Publish Post
+            </button>
         </div>
     </form>
-    <a href="/">Back to feed</a>
+
+    <!-- Back Link -->
+    <a href="/" class="back-link">Back to feed</a>
+
 </body>
 </html>

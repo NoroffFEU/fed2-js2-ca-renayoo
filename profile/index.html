@@ -2,17 +2,65 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Noroff FED2 JS2 CA</title>
-    <script type="module" src="/src/app.js"></script>
+    <title>Profile</title>
+    <script type="module" src="/src/js/api/profile/read.js" defer></script>
     <link rel="stylesheet" href="/src/css/style.css">
   </head>
-  <body>
-    <h1>Profile</h1>
+  <body class="bg-gray-50 font-sans text-gray-900">
+    <div class="profile-container">
 
-    <form name="updateProfile">
-      <button>Update Profile</button>
-    </form>
+      <h1 class="text-3xl font-semibold text-center mb-8">User Profile</h1>
+
+      <div id="profile-container" class="profile-card">
+        <!-- Banner Section -->
+        <div id="banner-container" class="mb-6">
+          <img id="banner" class="profile-banner" src="" alt="Profile Banner" />
+        </div>
+
+        <!-- Avatar and User Info -->
+        <div class="avatar-info mb-6">
+          <div id="avatar-container" class="avatar-container">
+            <img id="avatar" class="profile-avatar" src="" alt="Profile Avatar" />
+          </div>
+          <div class="info-container">
+            <h2 id="name" class="profile-name">Name Noroff</h2>
+            <p id="email" class="profile-email">name.example@stud.noroff.no</p>
+            <p id="bio" class="profile-bio">This is a short user bio...</p>
+          </div>
+        </div>
+
+        <!-- Profile Stats Section -->
+        <div id="profile-counts" class="stats-container mb-6">
+          <div class="stat">
+            <p class="stat-value" id="posts-count">0</p>
+            <p class="stat-label">Posts</p>
+          </div>
+          <div class="stat">
+            <p class="stat-value" id="followers-count">0</p>
+            <p class="stat-label">Followers</p>
+          </div>
+          <div class="stat">
+            <p class="stat-value" id="following-count">0</p>
+            <p class="stat-label">Following</p>
+          </div>
+        </div>
+
+        <!-- Follow/Unfollow Button -->
+        <div class="text-center mt-8">
+          <button id="follow-btn" class="follow-button px-6 py-2 bg-lilac-500 text-white font-semibold rounded-lg hover:bg-lilac-600 transition duration-300">Follow</button>
+        </div>
+
+        <!-- User Posts Section -->
+        <div id="posts-list" class="mb-6"></div>
+
+        <!-- Update Profile Button -->
+        <div class="text-center mt-8">
+          <form name="updateProfile">
+            <button type="button" class="update-button" style="display:none;">Update Profile</button>
+          </form>
+        </div>
+      </div>
+    </div>
   </body>
 </html>

@@ -2,8 +2,8 @@ import { API_SOCIAL_POSTS } from './api/constants.js';
 import { headers } from './api/headers.js'; 
 
 document.addEventListener("DOMContentLoaded", function () {
-    init();
-    setupLogoutButton(); 
+    showFeed();  // Call showFeed directly
+    setupLogoutButton();  // Setup logout button
 });
 
 // Constants for pagination
@@ -49,218 +49,200 @@ async function fetchPosts() {
 let currentPage = 1; // Track the current page
 let allPosts = []; // Store all fetched posts
 
+// Fetch posts and handle search and filter
 async function showFeed() {
-    allPosts = await fetchPosts(); 
-    renderPosts();
-    renderPagination();
+    allPosts = await fetchPosts();  // Fetch all posts
+    renderPosts();  // Render the posts
+    renderPagination();  // Render pagination
+    setupSearch();  // Setup search functionality
+    setupFilter();  // Setup filter functionality
 }
 
+// Search setup to handle filtering posts by search input
+function setupSearch() {
+    const searchInput = document.getElementById('search-input');
+    searchInput.addEventListener('input', () => {
+        currentPage = 1;  // Reset to the first page when searching
+        renderPosts();  // Re-render posts when user types in search input
+    });
+}
+
+// Filter setup to handle filtering posts by category
+function setupFilter() {
+    const filterDropdown = document.getElementById('filter-dropdown');
+    filterDropdown.addEventListener('change', () => {
+        currentPage = 1;  // Reset to the first page when the filter changes
+        renderPosts();  // Re-render posts when user changes the filter
+    });
+
+    // Populate filter options dynamically based on available tags/categories
+    const categories = Array.from(new Set(allPosts.flatMap(post => post.tags)));
+    const dropdown = filterDropdown;
+    categories.forEach(category => {
+        const option = document.createElement('option');
+        option.value = category;
+        option.textContent = category;
+        dropdown.appendChild(option);
+    });
+}
+
+// Function to render posts based on current page, search, and filter
 function renderPosts() {
-    const feedContainer = document.querySelector('.feed');
-    feedContainer.innerHTML = `
-        <h2>New posts</h2>
-        <p>Most recent posts:</p>
-        <ul id="posts-container" class="posts-container"></ul>
-    `;
-
     const postsContainer = document.getElementById('posts-container');
-    postsContainer.innerHTML = ''; // Clear previous posts
+    postsContainer.innerHTML = '';  // Clear previous posts
 
-    // Calculate posts to display
+    const searchQuery = document.getElementById('search-input').value.toLowerCase();
+    const selectedCategory = document.getElementById('filter-dropdown').value;
+
+    // Apply search and filter logic
+    const filteredPosts = allPosts.filter(post => {
+        // Modify this to search only in the title
+        const isSearchMatch = post.title.toLowerCase().includes(searchQuery);
+        const isCategoryMatch = selectedCategory ? post.tags.includes(selectedCategory) : true;
+        return isSearchMatch && isCategoryMatch;
+    });
+
+    // Calculate posts to display for the current page
     const startIndex = (currentPage - 1) * POSTS_PER_PAGE;
     const endIndex = startIndex + POSTS_PER_PAGE;
-    const postsToDisplay = allPosts.slice(startIndex, endIndex);
+    const postsToDisplay = filteredPosts.slice(startIndex, endIndex);
 
     if (postsToDisplay.length === 0) {
-        postsContainer.innerHTML = '<li>No posts available.</li>';
+        postsContainer.innerHTML = '<div>No posts available matching your search/filter.</div>';
         return;
     }
 
     postsToDisplay.forEach(post => {
-        const postElement = document.createElement('li');
-        postElement.className = 'post';
-    
+        const postElement = document.createElement('div');
+        postElement.className = 'post bg-white p-4 rounded-lg shadow-md';
+
         const titleElement = document.createElement('h4');
-        titleElement.className = 'post-title';
+        titleElement.className = 'post-title text-xl font-semibold';
         titleElement.textContent = post.title;
-    
+
         const dateElement = document.createElement('p');
-        dateElement.className = 'post-date';
+        dateElement.className = 'post-date text-gray-500 text-sm';
         const date = new Date(post.created);
         dateElement.textContent = `Published on: ${date.toLocaleDateString()}`;
-    
-        // Image handling
+
+        // Image handling (clickable)
         if (post.media && post.media.url) {
             const imgElement = document.createElement('img');
-            imgElement.src = post.media.url; 
-            imgElement.alt = post.media.alt || 'Post image'; 
+            imgElement.src = post.media.url;
+            imgElement.alt = post.media.alt || 'Post image';
+            imgElement.className = 'w-full max-h-96 object-cover rounded-md cursor-pointer';  
             imgElement.addEventListener('click', () => {
-                window.location.href = `/post/index.html?id=${post.id}`;
+                window.location.href = `/post/index.html?id=${post.id}`; // Redirect to the post when image is clicked
             });
             postElement.appendChild(imgElement);
         }
-    
+
         const bodyElement = document.createElement('p');
-        bodyElement.className = 'post-body';
+        bodyElement.className = 'post-body text-gray-700 mt-2';
         bodyElement.textContent = post.body;
-    
+
         const tagsElement = document.createElement('p');
-        tagsElement.className = 'post-tags';
+        tagsElement.className = 'post-tags text-gray-500 text-sm';
         tagsElement.textContent = `Categories: ${post.tags.join(', ')}`;
-        
-        // Comments and reactions count
+
+        // Comments count
         const commentsCountElement = document.createElement('p');
-        commentsCountElement.className = 'post-comments-count';
+        commentsCountElement.className = 'post-comments-count text-gray-500 text-sm';
         commentsCountElement.textContent = `Comments: ${post._count.comments || 0}`;
 
-        const reactionsCountElement = document.createElement('p');
-        reactionsCountElement.className = 'post-reactions-count';
-        reactionsCountElement.textContent = `Reactions: ${post._count.reactions || 0}`;
-    
-        const viewPostButton = document.createElement('button');
-        viewPostButton.textContent = 'View Post';
-        viewPostButton.className = 'view-post-button';
-        viewPostButton.addEventListener('click', () => {
-            window.location.href = `/post/index.html?id=${post.id}`;
-        });
-    
+        // Add all elements to the post container
         postElement.appendChild(titleElement);
-        postElement.appendChild(dateElement); 
+        postElement.appendChild(dateElement);
         postElement.appendChild(bodyElement);
         postElement.appendChild(tagsElement);
         postElement.appendChild(commentsCountElement);
-        postElement.appendChild(reactionsCountElement);
+
+        // Create the "View Post" button
+        const viewPostButton = document.createElement('button');
+        viewPostButton.className = 'view-post-button bg-lilac-500 text-white py-2 px-4 rounded mt-3 hover:bg-lilac-600';
+        viewPostButton.textContent = 'View Post';
+        viewPostButton.addEventListener('click', () => {
+            window.location.href = `/post/index.html?id=${post.id}`; // Redirect to the post page
+        });
+
         postElement.appendChild(viewPostButton);
-    
+
         postsContainer.appendChild(postElement);
-    });    
+    });
 }
 
+
+
+
 function renderPagination() {
-    const feedContainer = document.querySelector('.feed');
-    const paginationContainer = document.createElement('div');
-    paginationContainer.className = 'pagination';
-    
+    const paginationContainer = document.getElementById('pagination-container');
+    paginationContainer.innerHTML = ''; // Clear existing pagination
+
     const totalPages = Math.ceil(allPosts.length / POSTS_PER_PAGE);
-    
-    // Create previous button
+    const pageButtons = [];
+
+    // Previous page button
     const prevButton = document.createElement('button');
+    prevButton.className = 'pagination-button bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600';
     prevButton.textContent = 'Previous';
-    prevButton.disabled = currentPage === 1; // Disable if on the first page
+    prevButton.disabled = currentPage === 1;
     prevButton.addEventListener('click', () => {
         if (currentPage > 1) {
             currentPage--;
             renderPosts();
             renderPagination();
-            scrollToTop(); // Scroll to top on page change
+            window.scrollTo({ top: 0, behavior: 'smooth' }); // Scroll to top
         }
     });
-    
-    paginationContainer.appendChild(prevButton);
-    
-    // Create page number buttons
+
+    pageButtons.push(prevButton);
+
+    // Page number buttons
     for (let i = 1; i <= totalPages; i++) {
         const pageButton = document.createElement('button');
+        pageButton.className = 'pagination-button bg-gray-200 text-gray-700 py-2 px-4 rounded hover:bg-gray-300';
         pageButton.textContent = i;
-        pageButton.className = (i === currentPage) ? 'active' : '';
+        if (i === currentPage) {
+            pageButton.classList.add('bg-blue-500', 'text-white');
+        }
         pageButton.addEventListener('click', () => {
             currentPage = i;
             renderPosts();
             renderPagination();
-            scrollToTop(); // Scroll to top on page change
+            window.scrollTo({ top: 0, behavior: 'smooth' }); // Scroll to top
         });
-        paginationContainer.appendChild(pageButton);
+        pageButtons.push(pageButton);
     }
-    
-    // Create next button
+
+    // Next page button
     const nextButton = document.createElement('button');
+    nextButton.className = 'pagination-button bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600';
     nextButton.textContent = 'Next';
-    nextButton.disabled = currentPage === totalPages; // Disable if on the last page
+    nextButton.disabled = currentPage === totalPages;
     nextButton.addEventListener('click', () => {
         if (currentPage < totalPages) {
             currentPage++;
             renderPosts();
             renderPagination();
-            scrollToTop(); // Scroll to top on page change
+            window.scrollTo({ top: 0, behavior: 'smooth' }); // Scroll to top
         }
     });
-    
-    paginationContainer.appendChild(nextButton);
-    feedContainer.appendChild(paginationContainer);
-}
 
-// Scroll to top function
-function scrollToTop() {
-    window.scrollTo({
-        top: 0,
-        behavior: 'smooth' // Smooth scrolling
+    pageButtons.push(nextButton);
+
+    // Add all pagination buttons to the container
+    pageButtons.forEach(button => {
+        paginationContainer.appendChild(button);
     });
 }
 
-async function handleLogout() {
-    try {
-        localStorage.removeItem('accessToken');
-        localStorage.removeItem('username'); 
-        showLoginMessage();
-        updateMenuForLoggedOutUser();
-    } catch (error) {
-        console.error("Error during logout:", error);
-    }
-}
-
+// setupLogoutButton function
 function setupLogoutButton() {
-    const logoutButton = document.getElementById('logout');
+    const logoutButton = document.getElementById('logout-button');
     if (logoutButton) {
-        logoutButton.addEventListener('click', async function () {
-            await handleLogout();
+        logoutButton.addEventListener('click', () => {
+            localStorage.removeItem('accessToken');
+            window.location.href = 'auth/login/index.html'; // Redirect to login page
         });
-    } else {
-        console.warn('Logout button not found'); 
     }
 }
-
-// Updated menu for logged out user
-function updateMenuForLoggedOutUser() {
-    const publishPostLink = document.querySelector('.SM-menu a[href="/post/create/index.html"]');
-    const loginLink = document.querySelector('.SM-menu a[href="/auth/login/"]');
-    const registerLink = document.querySelector('.SM-menu a[href="/auth/register/"]');
-    const profileLink = document.querySelector('.SM-menu a[href="/profile/"]');
-    const logoutButton = document.getElementById('logout');
-
-    if (publishPostLink) publishPostLink.style.display = 'none'; 
-    if (loginLink) loginLink.style.display = 'inline'; 
-    if (registerLink) registerLink.style.display = 'inline'; 
-    if (profileLink) profileLink.style.display = 'none'; 
-    if (logoutButton) logoutButton.style.display = 'none'; 
-}
-
-// Showing and hiding menu for logged in user
-function updateMenuForLoggedInUser() {
-    const publishPostLink = document.querySelector('.SM-menu a[href="/post/create/index.html"]');
-    const loginLink = document.querySelector('.SM-menu a[href="/auth/login/"]');
-    const registerLink = document.querySelector('.SM-menu a[href="/auth/register/"]');
-    const profileLink = document.querySelector('.SM-menu a[href="/profile/"]');
-    const logoutButton = document.getElementById('logout');
-
-    if (publishPostLink) publishPostLink.style.display = 'inline'; 
-    if (loginLink) loginLink.style.display = 'none'; 
-    if (registerLink) registerLink.style.display = 'none'; 
-    if (profileLink) profileLink.style.display = 'inline'; 
-    if (logoutButton) logoutButton.style.display = 'inline'; 
-}
-
-async function init() {
-    const userIsLoggedIn = isUserLoggedIn();
-    
-    if (!userIsLoggedIn) {
-        showLoginMessage(); 
-    } else {
-        await showFeed(); 
-        updateMenuForLoggedInUser();
-    }
-}
-
-
-
-
-

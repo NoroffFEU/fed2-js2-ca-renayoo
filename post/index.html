@@ -4,14 +4,29 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Noroff FED2 JS2 CA</title>
-    <link rel="stylesheet" href="/src/css/style.css">
+    <link href="/src/css/style.css" rel="stylesheet">
     <script type="module" src="/src/js/api/post/postIDspecific.js"></script>
     <script type="module" src="/src/js/api/post/read.js"></script>
-    <link rel="stylesheet" href="/src/css/style.css">
 </head>
-<body>
-    <h1>Post Page ID specific</h1>
-    <div class="post-details"></div>
-    <a href="/" id="backBtn" style="text-decoration: none;"><button>Back</button>
+<body class="bg-lilac-80 font-sans text-gray-900">
+
+    <!-- Header -->
+    <header class="bg-blue-600 text-black py-4">
+        <h1 class="text-center text-2xl">Post Page ID specific</h1>
+    </header>
+
+    <!-- Post Details Section -->
+    <main class="container mx-auto p-4">
+        <div class="post-details bg-white p-6 rounded-lg shadow-md">
+        </div>
+
+        <!-- Back Button -->
+        <div class="mt-6">
+            <a href="/" id="backBtn" class="text-blue-600 hover:underline">
+                <button class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition">Back</button>
+            </a>
+        </div>
+    </main>
+
 </body>
 </html>
