@@ -177,6 +177,8 @@ async function addReactionToPost(postId, symbol) {
     }
 }
 
+
+// Submit a comment - Not working (Authentication issues)
 async function submitComment(postId, commentBody) {
     try {
         const token = localStorage.getItem('accessToken');
