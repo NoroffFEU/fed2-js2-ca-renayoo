@@ -7,7 +7,7 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     form.addEventListener("submit", async function (event) {
-        event.preventDefault();
+        event.preventDefault();  // Prevent the form from submitting and changing the URL
 
         // Clear previous messages
         const errorMessages = document.getElementById("errorMessages");
@@ -15,7 +15,7 @@ document.addEventListener("DOMContentLoaded", function () {
         errorMessages.innerText = "";
         successMessages.innerText = "";
 
-        // Form data
+        // Get the form data
         const email = document.getElementById("email").value.trim();
         const password = document.getElementById("password").value.trim();
 
@@ -25,7 +25,6 @@ document.addEventListener("DOMContentLoaded", function () {
             return;
         }
 
-        // Call login function
         try {
             await loginUser({ email, password });
         } catch (error) {
@@ -34,30 +33,30 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 });
 
-// Log in 
+// Log in
 async function loginUser({ email, password }) {
     try {
         const response = await fetch("https://v2.api.noroff.dev/auth/login", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ email, password }),
+            body: JSON.stringify({ email, password }),  // Send data as JSON
         });
 
         // Parse the response JSON
         const responseData = await response.json();
 
-        // Login ok or no? 
+        // Login ok or no?
         if (response.status !== 200) {
             throw new Error(responseData.message || "Login failed. Please check your credentials.");
         }
 
         // Correctly extract the accessToken from the data property
-        const accessToken = responseData.data.accessToken;  
+        const accessToken = responseData.data.accessToken;
 
         // Store the accessToken in localStorage
         if (accessToken) {
             localStorage.setItem("accessToken", accessToken);
-            
+
             // Extract and store userId and name (assuming 'name' is part of the JWT payload)
             const tokenPayload = JSON.parse(atob(accessToken.split('.')[1]));  // Decode JWT token
             const userId = tokenPayload.sub;  // Adjust based on your token structure
@@ -72,7 +71,7 @@ async function loginUser({ email, password }) {
         const successMessages = document.getElementById("successMessages");
         successMessages.innerText = "Logging in! Loading feed...";
         setTimeout(() => {
-           window.location.href = "/";  // Redirect to feed or homepage
+            window.location.href = "/";  // Redirect to feed or homepage
         }, 800);  // Delay for 0.8 seconds
     } catch (error) {
         console.error("Login failed:", error);
