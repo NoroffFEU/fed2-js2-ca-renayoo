@@ -70,7 +70,7 @@ async function showPost() {
     const loggedInUserName = getLoggedInUserName();
     const isOwner = post.author && post.author.name === loggedInUserName;
 
-    // Populate post details, including the body content
+    // Populate post details
     postDetailsContainer.innerHTML = `
         <h2>${post.title}</h2>
         ${post.media ? `<img src="${post.media.url}" alt="${post.media.alt}" />` : ''}
@@ -129,7 +129,7 @@ async function showPost() {
         </div>
     `;
 
-    // Attach event listeners for reactions
+    // Event listeners for reactions
     document.querySelectorAll('.reaction-button').forEach(button => {
         button.addEventListener('click', async function () {
             const symbol = button.getAttribute('data-symbol');
@@ -155,7 +155,7 @@ async function showPost() {
         });
     }
 
-    // Redirect to author's profile when their name is clicked
+    // Redirect to profile
     document.getElementById('author-name').addEventListener('click', () => {
         window.location.href = `/profile/index.html?name=${post.author.name}`; // Redirect to author's profile page
     });
