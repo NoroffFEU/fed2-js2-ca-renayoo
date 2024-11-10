@@ -8,50 +8,39 @@
     <script type="module" src="/src/js/api/auth/register.js" defer></script>
 </head>
 <body>
-    <h1>Register</h1>
-    <form name="register">
-        <div>
-            <label for="name">Name</label>
-            <input
-                id="name"
-                type="text"
-                name="name"
-                required
-                maxlength="20"
-                pattern="^[\w]+$"
-                title="Please enter a username using only letters and numbers"
-                autocomplete="username" 
-            />
+    <!-- Flex container to center the form -->
+    <div class="auth-center-wrapper">
+        <div class="auth-form-container">
+            <h1 class="auth-form-title">Create an Account</h1>
+
+            <form name="register">
+                <div class="auth-form-input-group">
+                    <label for="name" class="auth-label">Name</label>
+                    <input id="name" type="text" name="name" required maxlength="20" pattern="^[\w]+$" title="Please enter a username using only letters and numbers" autocomplete="username" class="auth-form-input"/>
+                </div>
+
+                <div class="auth-form-input-group">
+                    <label for="email" class="auth-label">Email</label>
+                    <input id="email" type="email" name="email" required pattern="^[\w\-.]+@(stud\.)?noroff\.no$" title="Please enter a valid noroff.no or stud.noroff.no address" autocomplete="email" class="auth-form-input"/>
+                </div>
+
+                <div class="auth-form-input-group">
+                    <label for="password" class="auth-label">Password</label>
+                    <input type="password" name="password" id="password" required minlength="8" autocomplete="current-password" class="auth-form-input"/>
+                </div>
+
+                <!-- Error and success message containers -->
+                <div id="errorMessages" class="auth-message auth-error-message"></div>
+                <div id="successMessages" class="auth-message auth-success-message"></div>
+
+                <a href="/auth/login/" class="auth-register-link">Already a User? Login Here</a>
+
+                <button type="submit" class="auth-register-button">
+                    Register
+                </button>
+            </form>
         </div>
-        <div>
-            <label for="email">Email</label>
-            <input
-                id="email"
-                type="email"
-                name="email"
-                required
-                pattern="^[\w\-.]+@(stud\.)?noroff\.no$"
-                title="Please enter a valid noroff.no or stud.noroff.no address"
-                autocomplete="email" 
-            />
-        </div>
-        <div>
-            <label for="password">Password</label>
-            <input
-                type="password"
-                name="password"
-                id="password"
-                required
-                minlength="8"
-                autocomplete="current-password" 
-            />
-        </div>
-        <!-- Error and success messages -->
-        <div id="errorMessages" style="color: red;"></div>
-        <div id="successMessages" style="color: green;"></div>
-        <a href="/auth/login/">Login</a>
-        <button type="submit">Register</button>
-    </form>
+    </div>
 </body>
 </html>
 

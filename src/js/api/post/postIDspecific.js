@@ -48,8 +48,8 @@ function getLoggedInUserName() {
     return localStorage.getItem('name');
 }
 
-// Display specific post by ID
-// Display specific post by ID
+
+
 async function showPost() {
     const postDetailsContainer = document.querySelector('.post-details');
     const urlParams = new URLSearchParams(window.location.search);
@@ -76,9 +76,7 @@ async function showPost() {
         ${post.media ? `<img src="${post.media.url}" alt="${post.media.alt}" />` : ''}
         <p><strong>Published on:</strong> ${new Date(post.created).toLocaleDateString()}</p>
         <p><strong>Last Updated on:</strong> ${new Date(post.updated).toLocaleDateString()}</p>
-        <p><strong>Author:</strong> ${post.author ? post.author.name : 'Unknown'}</p>
-        <p><strong>Body:</strong> ${post.body}</p>
-        <p><strong>Categories:</strong> ${post.tags.join(', ')}</p>
+        <p><strong>Author:</strong> <a href="javascript:void(0);" id="author-name" style="text-decoration: underline; color: blue; cursor: pointer;">${post.author.name}</a></p>
 
         ${isOwner ? `
             <div>
@@ -150,33 +148,48 @@ async function showPost() {
         }
     });
 
-    // Attach event listeners for replies
-    document.querySelectorAll('.reply-button').forEach(button => {
-        button.addEventListener('click', function () {
-            const commentId = button.getAttribute('data-comment-id');
-            const replyForm = document.getElementById(`reply-form-${commentId}`);
-            replyForm.style.display = 'block';
-        });
-    });
-
-    document.querySelectorAll('.submit-reply').forEach(button => {
-        button.addEventListener('click', async function () {
-            const commentId = button.getAttribute('data-comment-id');
-            const replyBody = document.getElementById(`reply-body-${commentId}`).value.trim();
-            if (replyBody) {
-                await submitReply(postId, commentId, replyBody);
-                await showPost(); // Refresh the post details after adding the reply
-            }
-        });
-    });
-
+    // Handle edit and delete buttons for the post owner
     if (isOwner) {
         document.getElementById('deletePost').addEventListener('click', () => deletePost(postId));
         document.getElementById('editPost').addEventListener('click', () => {
             window.location.href = `/post/edit/index.html?id=${postId}`;
         });
     }
+
+    // Redirect to author's profile when their name is clicked
+    document.getElementById('author-name').addEventListener('click', () => {
+        window.location.href = `/profile/index.html?name=${post.author.name}`; // Redirect to author's profile page
+    });
 }
+
+
+// Follow a user
+async function followUser(username) {
+    const token = localStorage.getItem('accessToken');
+    if (!token) {
+        alert("You must be logged in to follow users.");
+        return;
+    }
+
+    try {
+        const response = await fetch(`${API_SOCIAL_PROFILES}/${username}/follow`, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+            },
+        });
+
+        if (!response.ok) {
+            throw new Error("Failed to follow user");
+        }
+
+        alert(`You are now following ${username}`);
+    } catch (error) {
+        console.error("Error following user:", error);
+        alert('Error following user: ' + error.message);
+    }
+}
+
 
 // Add reaction to post
 async function addReactionToPost(postId, symbol) {
@@ -217,8 +230,6 @@ async function submitComment(postId, commentBody, replyToId = null) {
             replyToId: (typeof replyToId === 'number' || replyToId === null) ? replyToId : null // Ensure it's a number or null
         };
 
-        // Log request body to check the structure
-        console.log('Request Body:', requestBody);
 
         // Send the POST request to submit the comment
         const response = await fetch(`${API_SOCIAL_POSTS}/${postId}/comment`, {
@@ -243,8 +254,7 @@ async function submitComment(postId, commentBody, replyToId = null) {
             throw new Error('Failed to submit comment');
         }
 
-        // Successfully submitted the comment
-        console.log("Comment submitted successfully");
+
     } catch (error) {
         console.error('Error submitting comment:', error);
         alert('Error submitting comment: ' + error.message);

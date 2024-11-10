@@ -2,23 +2,210 @@
 @tailwind components;
 @tailwind utilities;
 
+body {
+    @apply bg-lilac-500; 
+}
+
+/* Container for the Login Form */
+.login-container {
+    @apply bg-lilac-200 shadow-xl rounded-lg p-8 max-w-sm w-full;
+}
+.login-title {
+    @apply text-2xl font-semibold text-gray-800 mb-6;
+}
+.form-input {
+    @apply w-full px-4 py-2 mt-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-custom-blue focus:border-custom-blue;
+}
+.login-button {
+    @apply w-full mt-4 py-2 px-4 bg-green-500 text-white font-semibold rounded-lg hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-50;
+}
+.register-link {
+    @apply text-black text-sm underline hover:text-white;
+}
+
+/* Message Styling for Errors and Success */
+.message {
+    @apply text-sm mb-4;
+}
+
+.error-message {
+    @apply text-red-600;
+}
+
+.success-message {
+    @apply text-green-600;
+}
+.center-wrapper {
+    @apply h-screen flex justify-center items-center;
+}
+
+/* Profile styling */
+
+.profile-container {
+    @apply mx-auto px-4 py-8;
+}
+.profile-card {
+    @apply max-w-4xl mx-auto bg-white shadow-lg rounded-lg p-6;
+}
+/* Banner */
+.profile-banner {
+    @apply w-full h-64 object-cover rounded-lg;
+}
+/* Avatar and Info Section */
+.avatar-info {
+    @apply flex items-center space-x-6 mb-6;
+}
+.avatar-container {
+    @apply flex-shrink-0;
+}
+.profile-avatar {
+    @apply w-24 h-24 rounded-full border-4 border-white shadow-md;
+}
+.info-container {
+    @apply flex-grow;
+}
+.profile-name {
+    @apply text-2xl font-bold text-gray-800;
+}
+.profile-email {
+    @apply text-gray-600 text-sm;
+}
+.profile-bio {
+    @apply text-gray-700 mt-2;
+}
+
+/* Profile Stats Section */
+.stats-container {
+    @apply grid grid-cols-3 gap-6 mb-6;
+}
+.stat {
+    @apply text-center;
+}
+.stat-value {
+    @apply font-semibold text-xl;
+}
+.stat-label {
+    @apply text-gray-500 text-sm;
+}
+
+/* Pagination */
+.pagination-container {
+    @apply flex justify-center space-x-4 mt-8;
+}
+
+/* Update Profile Button */
+.update-button {
+    @apply px-6 py-2 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700;
+}
+
+
+
 /* Specific ID styling */
 .post-details h2 {
     @apply text-xl font-semibold text-gray-800;
 }
-
 .reaction-buttons button {
     @apply px-3 py-2 bg-gray-200 rounded-full hover:bg-gray-300;
 }
-
 .comment-form textarea {
     @apply w-full p-4 border-2 border-gray-300 rounded-lg mt-2;
 }
-
 .comment-form button {
     @apply px-4 py-2 bg-green-500 text-white rounded-md mt-2 hover:bg-green-600;
 }
-
 .reply-form {
     @apply mt-4 bg-gray-50 p-4 rounded-lg shadow-sm;
+}
+
+/* Registration page styling */
+
+.auth-center-wrapper {
+    @apply h-screen flex justify-center items-center bg-lilac-500; /* Darker lilac background */
+}
+.auth-form-container {
+    @apply bg-lilac-200 shadow-xl rounded-lg p-8 max-w-sm w-full;
+}
+.auth-form-title {
+    @apply text-2xl font-semibold text-gray-800 mb-6;
+}
+.auth-form-input-group {
+    @apply mb-4;
+}
+.auth-label {
+    @apply block text-sm font-medium text-gray-700;
+}
+.auth-form-input {
+    @apply w-full px-4 py-2 mt-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-custom-blue focus:border-custom-blue;
+}
+.auth-register-button {
+    @apply w-full mt-4 py-2 px-4 bg-green-500 text-white font-semibold rounded-lg hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-50;
+}
+.auth-register-link {
+    @apply text-black text-sm hover:underline;
+}
+.auth-message {
+    @apply text-sm mb-4;
+}
+.auth-error-message {
+    @apply text-red-600;
+}
+.auth-success-message {
+    @apply text-green-600;
+}
+
+/* Create post container */
+.form-container {
+    @apply max-w-3xl mx-auto p-8 bg-white rounded-lg shadow-xl mt-8;
+}
+.form-label {
+    @apply block text-xl font-medium text-gray-700 mt-4;
+}
+.form-input {
+    @apply w-full px-4 py-2 border border-gray-300 rounded-lg mt-2 focus:ring-2 focus:ring-blue-500 focus:outline-none;
+}
+.form-textarea {
+    @apply w-full px-4 py-2 border border-gray-300 rounded-lg mt-2 focus:ring-2 focus:ring-blue-500 focus:outline-none h-40 resize-none;
+}
+.form-submit-button {
+    @apply w-full py-3 bg-blue-500 text-white font-semibold rounded-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500;
+}
+.back-link {
+    @apply block text-center mt-6 text-lilac-500 hover:underline;
+}
+.back-link {
+    @apply text-white bg-lilac-500 px-6 py-2 rounded-lg font-medium hover:bg-lilac-600 focus:outline-none focus:ring-2 focus:ring-lilac-500 focus:ring-opacity-50;
+}
+
+.edit-post-header {
+    @apply text-3xl font-bold text-center mt-12 text-gray-800;
+}
+
+/* Edit post styling*/
+.edit-post-form-container {
+    @apply max-w-3xl mx-auto p-8 bg-white rounded-lg shadow-xl mt-8;
+}
+.edit-post-label {
+    @apply block text-xl font-medium text-gray-700 mt-4;
+}
+.edit-post-input-field {
+    @apply w-full px-4 py-2 border border-gray-300 rounded-lg mt-2 focus:ring-2 focus:ring-blue-500 focus:outline-none;
+}
+.edit-post-textarea-field {
+    @apply w-full px-4 py-2 border border-gray-300 rounded-lg mt-2 focus:ring-2 focus:ring-blue-500 focus:outline-none h-40 resize-none;
+}
+.edit-post-save-button {
+    @apply w-full py-3 bg-blue-500 text-white font-semibold rounded-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500;
+}
+.edit-post-delete-button {
+    @apply w-full py-3 bg-red-500 text-white font-semibold rounded-lg hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500;
+}
+.edit-post-delete-button-container {
+    @apply mt-4;
+}
+.edit-post-button-container {
+    @apply mt-6;
+}
+.edit-post-form-container input,
+.edit-post-form-container textarea {
+    @apply mb-4; /* Add margin between fields */
 }

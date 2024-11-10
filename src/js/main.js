@@ -49,24 +49,66 @@ async function fetchPosts() {
 let currentPage = 1; // Track the current page
 let allPosts = []; // Store all fetched posts
 
+// Fetch posts and handle search and filter
 async function showFeed() {
-    allPosts = await fetchPosts(); 
-    renderPosts();
-    renderPagination();
+    allPosts = await fetchPosts();  // Fetch all posts
+    renderPosts();  // Render the posts
+    renderPagination();  // Render pagination
+    setupSearch();  // Setup search functionality
+    setupFilter();  // Setup filter functionality
 }
 
-// Function to render posts based on the current page
+// Search setup to handle filtering posts by search input
+function setupSearch() {
+    const searchInput = document.getElementById('search-input');
+    searchInput.addEventListener('input', () => {
+        currentPage = 1;  // Reset to the first page when searching
+        renderPosts();  // Re-render posts when user types in search input
+    });
+}
+
+// Filter setup to handle filtering posts by category
+function setupFilter() {
+    const filterDropdown = document.getElementById('filter-dropdown');
+    filterDropdown.addEventListener('change', () => {
+        currentPage = 1;  // Reset to the first page when the filter changes
+        renderPosts();  // Re-render posts when user changes the filter
+    });
+
+    // Populate filter options dynamically based on available tags/categories
+    const categories = Array.from(new Set(allPosts.flatMap(post => post.tags)));
+    const dropdown = filterDropdown;
+    categories.forEach(category => {
+        const option = document.createElement('option');
+        option.value = category;
+        option.textContent = category;
+        dropdown.appendChild(option);
+    });
+}
+
+// Function to render posts based on current page, search, and filter
 function renderPosts() {
     const postsContainer = document.getElementById('posts-container');
-    postsContainer.innerHTML = ''; // Clear previous posts
+    postsContainer.innerHTML = '';  // Clear previous posts
 
-    // Calculate posts to display
+    const searchQuery = document.getElementById('search-input').value.toLowerCase();
+    const selectedCategory = document.getElementById('filter-dropdown').value;
+
+    // Apply search and filter logic
+    const filteredPosts = allPosts.filter(post => {
+        // Modify this to search only in the title
+        const isSearchMatch = post.title.toLowerCase().includes(searchQuery);
+        const isCategoryMatch = selectedCategory ? post.tags.includes(selectedCategory) : true;
+        return isSearchMatch && isCategoryMatch;
+    });
+
+    // Calculate posts to display for the current page
     const startIndex = (currentPage - 1) * POSTS_PER_PAGE;
     const endIndex = startIndex + POSTS_PER_PAGE;
-    const postsToDisplay = allPosts.slice(startIndex, endIndex);
+    const postsToDisplay = filteredPosts.slice(startIndex, endIndex);
 
     if (postsToDisplay.length === 0) {
-        postsContainer.innerHTML = '<div>No posts available.</div>';
+        postsContainer.innerHTML = '<div>No posts available matching your search/filter.</div>';
         return;
     }
 
@@ -115,9 +157,21 @@ function renderPosts() {
         postElement.appendChild(tagsElement);
         postElement.appendChild(commentsCountElement);
 
+        // Create the "View Post" button
+        const viewPostButton = document.createElement('button');
+        viewPostButton.className = 'view-post-button bg-lilac-500 text-white py-2 px-4 rounded mt-3 hover:bg-lilac-600';
+        viewPostButton.textContent = 'View Post';
+        viewPostButton.addEventListener('click', () => {
+            window.location.href = `/post/index.html?id=${post.id}`; // Redirect to the post page
+        });
+
+        postElement.appendChild(viewPostButton);
+
         postsContainer.appendChild(postElement);
     });
 }
+
+
 
 
 function renderPagination() {
@@ -181,7 +235,6 @@ function renderPagination() {
         paginationContainer.appendChild(button);
     });
 }
-
 
 // setupLogoutButton function
 function setupLogoutButton() {
