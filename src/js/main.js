@@ -2,8 +2,8 @@ import { API_SOCIAL_POSTS } from './api/constants.js';
 import { headers } from './api/headers.js'; 
 
 document.addEventListener("DOMContentLoaded", function () {
-    init();
-    setupLogoutButton(); 
+    showFeed();  // Call showFeed directly
+    setupLogoutButton();  // Setup logout button
 });
 
 // Constants for pagination
@@ -57,13 +57,6 @@ async function showFeed() {
 
 // Function to render posts based on the current page
 function renderPosts() {
-    const feedContainer = document.querySelector('.feed');
-    feedContainer.innerHTML = `
-        <h2>New posts</h2>
-        <p>Most recent posts:</p>
-        <div id="posts-container" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4"></div>
-    `;
-
     const postsContainer = document.getElementById('posts-container');
     postsContainer.innerHTML = ''; // Clear previous posts
 
@@ -78,19 +71,6 @@ function renderPosts() {
     }
 
     postsToDisplay.forEach(post => {
-        // Ensure reactions object is initialized
-        if (!post.reactions) {
-            post.reactions = {}; // Initialize if not present
-        }
-
-        // Initialize reaction counts for each symbol if not already initialized
-        const reactionSymbols = ['👍', '❤️', '😂', '😮', '😢', '😡'];
-        reactionSymbols.forEach(symbol => {
-            if (post.reactions[symbol] === undefined) {
-                post.reactions[symbol] = 0; // Default to 0 if not present
-            }
-        });
-
         const postElement = document.createElement('div');
         postElement.className = 'post bg-white p-4 rounded-lg shadow-md';
 
@@ -108,7 +88,7 @@ function renderPosts() {
             const imgElement = document.createElement('img');
             imgElement.src = post.media.url;
             imgElement.alt = post.media.alt || 'Post image';
-            imgElement.className = 'w-full h-48 object-cover rounded-md cursor-pointer'; // Added cursor-pointer for clickability
+            imgElement.className = 'w-full max-h-96 object-cover rounded-md cursor-pointer';  // Image size increased
             imgElement.addEventListener('click', () => {
                 window.location.href = `/post/index.html?id=${post.id}`; // Redirect to the post when image is clicked
             });
@@ -128,153 +108,88 @@ function renderPosts() {
         commentsCountElement.className = 'post-comments-count text-gray-500 text-sm';
         commentsCountElement.textContent = `Comments: ${post._count.comments || 0}`;
 
-        // Reaction buttons and their counts
-        const reactionsSection = document.createElement('div');
-        reactionsSection.className = 'reaction-buttons flex space-x-2 mt-2';
-
-        reactionSymbols.forEach(symbol => {
-            const reactionButton = document.createElement('button');
-            reactionButton.className = 'reaction-button bg-gray-200 text-lg p-2 rounded';
-            reactionButton.textContent = symbol;
-
-            // Create a counter display for each reaction
-            const reactionCountElement = document.createElement('span');
-            reactionCountElement.className = 'reaction-count text-sm ml-2';
-            reactionCountElement.textContent = post.reactions[symbol]; // Use the reaction count for the symbol
-
-            reactionButton.appendChild(reactionCountElement);
-
-            // Add event listener to handle click
-            reactionButton.setAttribute('data-symbol', symbol);
-            reactionButton.addEventListener('click', async function () {
-                // Update the reaction count on the server
-                await addReactionToPost(post.id, symbol);
-
-                // Update the counter dynamically without reloading
-                reactionCountElement.textContent = (parseInt(reactionCountElement.textContent) + 1);
-            });
-
-            reactionsSection.appendChild(reactionButton);
-        });
-
-        const viewPostButton = document.createElement('button');
-        viewPostButton.textContent = 'View Post';
-        viewPostButton.className = 'view-post-button mt-4 bg-blue-500 text-white p-2 rounded-md';
-        viewPostButton.addEventListener('click', () => {
-            window.location.href = `/post/index.html?id=${post.id}`;
-        });
-
+        // Add all elements to the post container
         postElement.appendChild(titleElement);
         postElement.appendChild(dateElement);
         postElement.appendChild(bodyElement);
         postElement.appendChild(tagsElement);
         postElement.appendChild(commentsCountElement);
-        postElement.appendChild(reactionsSection); // Append reactions section
-        postElement.appendChild(viewPostButton);
 
         postsContainer.appendChild(postElement);
     });
 }
 
-// Pagination rendering logic
+
 function renderPagination() {
-    const feedContainer = document.querySelector('.feed');
-    const paginationContainer = document.createElement('div');
-    paginationContainer.className = 'pagination mt-4 flex justify-center space-x-2';
+    const paginationContainer = document.getElementById('pagination-container');
+    paginationContainer.innerHTML = ''; // Clear existing pagination
 
     const totalPages = Math.ceil(allPosts.length / POSTS_PER_PAGE);
+    const pageButtons = [];
 
-    // Create previous button
+    // Previous page button
     const prevButton = document.createElement('button');
+    prevButton.className = 'pagination-button bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600';
     prevButton.textContent = 'Previous';
-    prevButton.className = 'bg-gray-300 p-2 rounded';
-    prevButton.disabled = currentPage === 1; // Disable if on the first page
+    prevButton.disabled = currentPage === 1;
     prevButton.addEventListener('click', () => {
         if (currentPage > 1) {
             currentPage--;
             renderPosts();
             renderPagination();
-            scrollToTop(); // Scroll to top on page change
+            window.scrollTo({ top: 0, behavior: 'smooth' }); // Scroll to top
         }
     });
-    paginationContainer.appendChild(prevButton);
 
-    // Create page number buttons
+    pageButtons.push(prevButton);
+
+    // Page number buttons
     for (let i = 1; i <= totalPages; i++) {
         const pageButton = document.createElement('button');
+        pageButton.className = 'pagination-button bg-gray-200 text-gray-700 py-2 px-4 rounded hover:bg-gray-300';
         pageButton.textContent = i;
-        pageButton.className = (i === currentPage) ? 'bg-blue-500 text-white p-2 rounded' : 'bg-gray-300 p-2 rounded';
+        if (i === currentPage) {
+            pageButton.classList.add('bg-blue-500', 'text-white');
+        }
         pageButton.addEventListener('click', () => {
             currentPage = i;
             renderPosts();
             renderPagination();
-            scrollToTop(); // Scroll to top on page change
+            window.scrollTo({ top: 0, behavior: 'smooth' }); // Scroll to top
         });
-        paginationContainer.appendChild(pageButton);
+        pageButtons.push(pageButton);
     }
 
-    // Create next button
+    // Next page button
     const nextButton = document.createElement('button');
+    nextButton.className = 'pagination-button bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600';
     nextButton.textContent = 'Next';
-    nextButton.className = 'bg-gray-300 p-2 rounded';
-    nextButton.disabled = currentPage === totalPages; // Disable if on the last page
+    nextButton.disabled = currentPage === totalPages;
     nextButton.addEventListener('click', () => {
         if (currentPage < totalPages) {
             currentPage++;
             renderPosts();
             renderPagination();
-            scrollToTop(); // Scroll to top on page change
+            window.scrollTo({ top: 0, behavior: 'smooth' }); // Scroll to top
         }
     });
-    paginationContainer.appendChild(nextButton);
 
-    // Append the pagination container to the feed
-    feedContainer.appendChild(paginationContainer);
-}
+    pageButtons.push(nextButton);
 
-// Scroll to top function
-function scrollToTop() {
-    window.scrollTo({
-        top: 0,
-        behavior: 'smooth' // Smooth scrolling
+    // Add all pagination buttons to the container
+    pageButtons.forEach(button => {
+        paginationContainer.appendChild(button);
     });
 }
 
-// Function to update the reaction count on the server
-async function addReactionToPost(postId, symbol) {
-    try {
-        const response = await fetch(`${API_SOCIAL_POSTS}/${postId}/react/${symbol}`, {
-            method: 'PUT',
-            headers: headers(),
-        });
 
-        if (!response.ok) {
-            throw new Error('Failed to add reaction');
-        }
-    } catch (error) {
-        console.error('Error adding reaction:', error);
-    }
-}
-
-// Function to set up logout button functionality
+// setupLogoutButton function
 function setupLogoutButton() {
-    const logoutButton = document.getElementById('logout');
+    const logoutButton = document.getElementById('logout-button');
     if (logoutButton) {
         logoutButton.addEventListener('click', () => {
             localStorage.removeItem('accessToken');
-            location.reload(); // Refresh the page after logging out
+            window.location.href = 'auth/login/index.html'; // Redirect to login page
         });
     }
 }
-
-// Initialize the app
-function init() {
-    if (isUserLoggedIn()) {
-        showFeed();
-    } else {
-        showLoginMessage();
-    }
-}
-
-
-
