@@ -161,35 +161,6 @@ async function showPost() {
     });
 }
 
-
-// Follow a user
-async function followUser(username) {
-    const token = localStorage.getItem('accessToken');
-    if (!token) {
-        alert("You must be logged in to follow users.");
-        return;
-    }
-
-    try {
-        const response = await fetch(`${API_SOCIAL_PROFILES}/${username}/follow`, {
-            method: 'POST',
-            headers: {
-                'Authorization': `Bearer ${token}`,
-            },
-        });
-
-        if (!response.ok) {
-            throw new Error("Failed to follow user");
-        }
-
-        alert(`You are now following ${username}`);
-    } catch (error) {
-        console.error("Error following user:", error);
-        alert('Error following user: ' + error.message);
-    }
-}
-
-
 // Add reaction to post
 async function addReactionToPost(postId, symbol) {
     try {
@@ -206,54 +177,34 @@ async function addReactionToPost(postId, symbol) {
     }
 }
 
-
-// Submit comment to post
-async function submitComment(postId, commentBody, replyToId = null) {
+async function submitComment(postId, commentBody) {
     try {
-        // Ensure the comment body is not empty
-        if (!commentBody.trim()) {
-            alert("Comment cannot be empty.");
-            return;
-        }
-
-        // Retrieve the token from localStorage (or wherever you store it)
         const token = localStorage.getItem('accessToken');
         if (!token) {
             alert("You must be logged in to comment.");
             return;
         }
 
-        // Prepare the request body as a JSON object
         const requestBody = {
-            body: commentBody,  // The text of the comment (required)
-            replyToId: (typeof replyToId === 'number' || replyToId === null) ? replyToId : null // Ensure it's a number or null
+            body: commentBody
         };
 
-
-        // Send the POST request to submit the comment
         const response = await fetch(`${API_SOCIAL_POSTS}/${postId}/comment`, {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json', // Ensure content type is JSON
-                'Authorization': `Bearer ${token}` // Add the authorization token here
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}` 
             },
-            body: JSON.stringify(requestBody), // Send the request body as a JSON object
+            body: JSON.stringify(requestBody),
         });
 
-        // Check if the response was successful
         if (!response.ok) {
             const errorResponse = await response.json();
             console.error('Error response:', errorResponse);
-            // Log each error in the 'errors' array for better debugging
-            if (errorResponse.errors && errorResponse.errors.length > 0) {
-                errorResponse.errors.forEach(err => {
-                    console.error('Error detail:', err);
-                });
-            }
             throw new Error('Failed to submit comment');
         }
 
-
+        alert('Comment submitted successfully!');
     } catch (error) {
         console.error('Error submitting comment:', error);
         alert('Error submitting comment: ' + error.message);
