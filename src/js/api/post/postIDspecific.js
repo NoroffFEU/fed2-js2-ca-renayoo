@@ -49,7 +49,7 @@ function getLoggedInUserName() {
 }
 
 
-
+// Show post
 async function showPost() {
     const postDetailsContainer = document.querySelector('.post-details');
     const urlParams = new URLSearchParams(window.location.search);
@@ -70,21 +70,22 @@ async function showPost() {
     const loggedInUserName = getLoggedInUserName();
     const isOwner = post.author && post.author.name === loggedInUserName;
 
-    // Populate post details
+    // Populate post details, including the body content
     postDetailsContainer.innerHTML = `
         <h2>${post.title}</h2>
         ${post.media ? `<img src="${post.media.url}" alt="${post.media.alt}" />` : ''}
         <p><strong>Published on:</strong> ${new Date(post.created).toLocaleDateString()}</p>
         <p><strong>Last Updated on:</strong> ${new Date(post.updated).toLocaleDateString()}</p>
         <p><strong>Author:</strong> <a href="javascript:void(0);" id="author-name" style="text-decoration: underline; color: blue; cursor: pointer;">${post.author.name}</a></p>
-
+        <div class="post-body">
+            ${post.body ? `<p>${post.body}</p>` : '<p>No content available for this post.</p>'}
+        </div>
         ${isOwner ? `
             <div>
                 <button id="editPost" class="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 transition">Edit Post</button>
                 <button id="deletePost" class="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 transition">Delete Post</button>
             </div>
         ` : ''}
-
         <h3>Reactions:</h3>
         <div class="reaction-buttons">
             <button class="reaction-button" data-symbol="👍">👍</button>
@@ -101,7 +102,6 @@ async function showPost() {
                 </li>
             `).join('') : `<li>${post._count.reactions} reaction(s)</li>`}
         </ul>
-
         <h3>Comments:</h3>
         <p>${post._count.comments} comment(s)</p>
         <ul class="comments-list">
@@ -122,7 +122,6 @@ async function showPost() {
                 </li>
             `).join('') : '<li>No comments available.</li>'}
         </ul>
-
         <h3>Leave a Comment:</h3>
         <div class="comment-form">
             <textarea id="commentBody" placeholder="Write your comment..."></textarea>
