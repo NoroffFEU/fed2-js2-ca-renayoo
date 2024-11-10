@@ -1,10 +1,9 @@
-import { API_SOCIAL_PROFILES, API_SOCIAL_POSTS } from "../constants"; 
+import { API_SOCIAL_PROFILES, API_SOCIAL_POSTS, API_BASE } from "../constants"; 
 import { headers } from "../headers"; 
 
-// Function to fetch user profile by name
+// Function to fetch the profile of a user
 async function fetchProfile(name) {
     try {
-        // Fetch the profile data
         const response = await fetch(`${API_SOCIAL_PROFILES}/${name}`, {
             method: "GET",
             headers: headers(),
@@ -14,9 +13,8 @@ async function fetchProfile(name) {
             throw new Error("Profile not found");
         }
 
-        // Parse the response JSON
         const data = await response.json();
-        const profile = data.data;  // Extract profile data
+        const profile = data.data;
 
         // Update the profile information in the DOM
         document.getElementById('banner').src = profile.banner.url;
@@ -31,19 +29,33 @@ async function fetchProfile(name) {
         document.getElementById('following-count').textContent = profile._count.following;
 
         // Fetch the posts made by the user
-        await fetchUserPosts(profile.name, 1); // Fetch posts for page 1
+        fetchUserPosts(profile.name); // Fetch posts for the viewed profile
+
+        // Handle the follow button logic
+        handleFollowButton(profile);
+
+        // Create and render 'Back to Feed' button dynamically with spacing
+        const backToFeedButtonContainer = document.getElementById('profile-container'); // The container where the button will be added
+        const backToFeedButton = document.createElement('button');
+        backToFeedButton.textContent = 'Back to Feed';
+        backToFeedButton.className = 'bg-green-500 text-white py-2 px-4 rounded-lg hover:bg-green-600 transition duration-300 mt-4 mb-6'; // Tailwind classes for green button with margin
+
+        backToFeedButton.addEventListener('click', () => {
+            window.location.href = '/';  // Navigate to the feed page
+        });
+
+        // Append the 'Back to Feed' button to the profile container
+        backToFeedButtonContainer.insertBefore(backToFeedButton, backToFeedButtonContainer.firstChild);  // Insert at the top of the container
 
     } catch (error) {
         console.error("Error fetching profile:", error);
     }
 }
 
-// Function to fetch posts made by the user (with pagination support)
-async function fetchUserPosts(username, page = 1) {
-    const postsPerPage = 5; // Set the limit to 5 posts per page
-
+// Function to fetch all posts made by the user 
+async function fetchUserPosts(username) {
     try {
-        const response = await fetch(`${API_SOCIAL_PROFILES}/${name}/posts?page=${page}&limit=${postsPerPage}`, {
+        const response = await fetch(`${API_SOCIAL_PROFILES}/${username}/posts`, {
             method: "GET",
             headers: headers(),
         });
@@ -54,13 +66,11 @@ async function fetchUserPosts(username, page = 1) {
 
         // Parse the response JSON
         const data = await response.json();
-        const posts = data.data; 
-        const meta = data.meta;  
+        const posts = data.data;
 
         // Check if there are posts
         if (posts && posts.length > 0) {
             displayUserPosts(posts); // Display the posts
-            renderPagination(meta); // Render pagination buttons
         } else {
             document.getElementById('posts-list').innerHTML = '<p>No posts available.</p>';
         }
@@ -69,26 +79,28 @@ async function fetchUserPosts(username, page = 1) {
     }
 }
 
-
 // Function to display the list of posts
 function displayUserPosts(posts) {
     const postsContainer = document.getElementById('posts-list');
-    postsContainer.innerHTML = ''; 
+    postsContainer.innerHTML = '';  // Clear previous posts
 
     // Loop through posts and create elements for each
     posts.forEach(post => {
         const postElement = document.createElement('div');
-        postElement.className = 'post-item';
+        postElement.className = 'post-item mb-6 p-4 bg-white rounded-lg shadow-md';
 
         const postTitle = document.createElement('h4');
+        postTitle.className = 'text-xl font-semibold text-gray-800';
         postTitle.textContent = post.title;
         postElement.appendChild(postTitle);
 
         const postBody = document.createElement('p');
+        postBody.className = 'text-gray-600';
         postBody.textContent = post.body.length > 100 ? post.body.substring(0, 100) + '...' : post.body;
         postElement.appendChild(postBody);
 
         const postDate = document.createElement('p');
+        postDate.className = 'text-sm text-gray-500 mt-2';
         const date = new Date(post.created);
         postDate.textContent = `Published on: ${date.toLocaleDateString()}`;
         postElement.appendChild(postDate);
@@ -99,59 +111,119 @@ function displayUserPosts(posts) {
         viewPostButton.addEventListener('click', () => {
             window.location.href = `/post/index.html?id=${post.id}`;
         });
+        
+        // Tailwind classes for "View Post" button
+        viewPostButton.className = 'mt-4 px-6 py-2 bg-lilac-500 text-white font-semibold rounded-lg hover:bg-lilac-600 transition duration-300';
+
         postElement.appendChild(viewPostButton);
 
         postsContainer.appendChild(postElement);
     });
 }
 
-// Function to render pagination buttons
-function renderPagination(meta) {
-    const paginationContainer = document.getElementById('pagination');
-    paginationContainer.innerHTML = ''; 
+function handleFollowButton(profile) {
+    const followButton = document.getElementById('follow-btn');
 
-    const totalPages = meta.pageCount;
-
-    // Create previous button
-    const prevButton = document.createElement('button');
-    prevButton.textContent = 'Previous';
-    prevButton.disabled = !meta.isFirstPage; // Disavle btn if 1st page
-    prevButton.addEventListener('click', () => {
-        if (!meta.isFirstPage) {
-            fetchUserPosts(localStorage.getItem('name'), meta.previousPage);
-        }
-    });
-    paginationContainer.appendChild(prevButton);
-
-    // Create page number buttons
-    for (let i = 1; i <= totalPages; i++) {
-        const pageButton = document.createElement('button');
-        pageButton.textContent = i;
-        pageButton.addEventListener('click', () => {
-            fetchUserPosts(localStorage.getItem('name'), i);
-        });
-        paginationContainer.appendChild(pageButton);
+    // Check if the follow button exists
+    if (!followButton) {
+        console.error('Follow button not found!');
+        return; // Exit early if the button doesn't exist
     }
 
-    // Create next button
-    const nextButton = document.createElement('button');
-    nextButton.textContent = 'Next';
-    nextButton.disabled = !meta.isLastPage; // Disable if on the last page
-    nextButton.addEventListener('click', () => {
-        if (!meta.isLastPage) {
-            fetchUserPosts(localStorage.getItem('name'), meta.nextPage);
+    // Get the logged-in user's name
+    const loggedInUserName = localStorage.getItem('name');
+
+    // If the profile belongs to the logged-in user, hide the follow button
+    if (profile.name === loggedInUserName) {
+        followButton.style.display = 'none';
+        return;
+    }
+
+    // Check localStorage for follow status
+    const followStatus = JSON.parse(localStorage.getItem('followStatus')) || {};
+    let isFollowing = followStatus[profile.name] || false;  // Use `let` here
+
+    // Set the button text based on whether the user is following
+    followButton.textContent = isFollowing ? 'Unfollow' : 'Follow';
+
+    // Add event listener for follow/unfollow action
+    followButton.removeEventListener('click', followUnfollowAction);
+    followButton.addEventListener('click', followUnfollowAction);
+
+    // Action for follow/unfollow
+    async function followUnfollowAction() {
+        if (isFollowing) {
+            await unfollowUser(profile.name);
+            followButton.textContent = 'Follow';
+            const followersCount = document.getElementById('followers-count');
+            followersCount.textContent = parseInt(followersCount.textContent) - 1;
+
+            // Update follow status in localStorage
+            followStatus[profile.name] = false;
+            localStorage.setItem('followStatus', JSON.stringify(followStatus));
+        } else {
+            await followUser(profile.name);
+            followButton.textContent = 'Unfollow';
+            const followersCount = document.getElementById('followers-count');
+            followersCount.textContent = parseInt(followersCount.textContent) + 1;
+
+            // Update follow status in localStorage
+            followStatus[profile.name] = true;
+            localStorage.setItem('followStatus', JSON.stringify(followStatus));
         }
-    });
-    paginationContainer.appendChild(nextButton);
+
+        // Update the isFollowing state after the action
+        isFollowing = !isFollowing; 
+    }
 }
 
-// Get the name from localStorage 
-const name = localStorage.getItem('name');
 
-// If the user is logged in and their name is available, fetch their profile
-if (name) {
-    fetchProfile(name);  
+// Function to follow a user
+async function followUser(name) {
+    try {
+        const response = await fetch(`${API_BASE}/social/profiles/${name}/follow`, {
+            method: "PUT",
+            headers: headers(),
+        });
+
+        if (!response.ok) {
+            const errorResponse = await response.json(); 
+            console.error("Error response:", errorResponse.errors); // Log the error details for debugging
+            throw new Error("Error following the user");
+        }
+
+    } catch (error) {
+        console.error("Error following user:", error);
+    }
+}
+
+// Function to unfollow a user
+async function unfollowUser(name) {
+    try {
+        const response = await fetch(`${API_BASE}/social/profiles/${name}/unfollow`, {
+            method: "PUT",
+            headers: headers(),
+        });
+
+        if (!response.ok) {
+            const errorResponse = await response.json();
+            console.error("Error response:", errorResponse.errors);
+            throw new Error("Error unfollowing the user");
+        }
+
+    } catch (error) {
+        console.error("Error unfollowing user:", error);
+    }
+}
+
+// Get the profile name from the URL query parameters
+const urlParams = new URLSearchParams(window.location.search);
+const profileName = urlParams.get('name');  
+
+// If 'name' exists, fetch that user's profile other else, fetch the logged-in user's profile
+if (profileName) {
+    fetchProfile(profileName);
 } else {
-    console.log('No user is logged in.');
-    window.location.href = "/login";  // Redirect to the login page if not logged in
+    const loggedInUserName = localStorage.getItem('name');
+    fetchProfile(loggedInUserName);
 }
