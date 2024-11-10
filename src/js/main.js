@@ -88,7 +88,7 @@ function renderPosts() {
             const imgElement = document.createElement('img');
             imgElement.src = post.media.url;
             imgElement.alt = post.media.alt || 'Post image';
-            imgElement.className = 'w-full max-h-96 object-cover rounded-md cursor-pointer';  // Image size increased
+            imgElement.className = 'w-full max-h-96 object-cover rounded-md cursor-pointer';  
             imgElement.addEventListener('click', () => {
                 window.location.href = `/post/index.html?id=${post.id}`; // Redirect to the post when image is clicked
             });
